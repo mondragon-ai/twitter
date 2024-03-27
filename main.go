@@ -25,9 +25,6 @@ func main() {
 
 	fmt.Println("Starting Server")
 
-	if args := os.Args; len(args) > 1 && args[1] == "-register" {
-		go registerWebhook()
-	}
 	//Create a new Mux Handler
 	m := mux.NewRouter()
 	//Listen to the base url and send a response
@@ -38,13 +35,17 @@ func main() {
 	//Listen to crc check and handle
 	m.HandleFunc("/webhook/twitter", CrcCheck).Methods("GET")
 	//Listen to webhook event and handle
-	m.HandleFunc("/twitter/webhook", WebhookHandler).Methods("POST")
+	m.HandleFunc("/webhook/twitter", WebhookHandler).Methods("POST")
 
 	//Start Server
 	server := &http.Server{
 		Handler: m,
 	}
-	server.Addr = ":9090"
+	server.Addr = ":8080"
+
+	if args := os.Args; len(args) > 1 && args[1] == "-register" {
+		go RegisterWebhook()
+	}
 	server.ListenAndServe()
 }
 
@@ -68,7 +69,7 @@ func WebhookHandler(writer http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		fmt.Println("An error occured:")
 		fmt.Println(err.Error())
-	} else{
+	} else {
 		fmt.Println("Tweet sent successfully")
 	}
 }

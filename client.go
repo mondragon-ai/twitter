@@ -40,7 +40,7 @@ func CreateClient() *http.Client {
 
 	return config.Client(oauth1.NoContext, token)
 }
-func registerWebhook(){
+func RegisterWebhook() {
 	fmt.Println("Registering webhook...")
 	httpClient := CreateClient()
 
@@ -48,6 +48,7 @@ func registerWebhook(){
 	path := "https://api.twitter.com/1.1/account_activity/all/" + os.Getenv("WEBHOOK_ENV") + "/webhooks.json"
 	values := url.Values{}
 	values.Set("url", os.Getenv("APP_URL")+"/webhook/twitter")
+	fmt.Println(values, path)
 
 	//Make Oauth Post with parameters
 	resp, _ := httpClient.PostForm(path, values)
@@ -63,7 +64,7 @@ func registerWebhook(){
 	subscribeWebhook()
 }
 
-func subscribeWebhook(){
+func subscribeWebhook() {
 	fmt.Println("Subscribing webapp...")
 	client := CreateClient()
 	path := "https://api.twitter.com/1.1/account_activity/all/" + os.Getenv("WEBHOOK_ENV") + "/subscriptions.json"
@@ -73,7 +74,7 @@ func subscribeWebhook(){
 	//If response code is 204 it was successful
 	if resp.StatusCode == 204 {
 		fmt.Println("Subscribed successfully")
-	} else if resp.StatusCode!= 204 {
+	} else if resp.StatusCode != 204 {
 		fmt.Println("Could not subscribe the webhook. Response below:")
 		fmt.Println(string(body))
 	}
@@ -85,11 +86,11 @@ func SendTweet(tweet string, reply_id string) (*Tweet, error) {
 	var responseTweet Tweet
 	//Add params
 	params := url.Values{}
-	params.Set("status",tweet)
-	params.Set("in_reply_to_status_id",reply_id)
+	params.Set("status", tweet)
+	params.Set("in_reply_to_status_id", reply_id)
 	//Grab client and post
 	client := CreateClient()
-	resp, err := client.PostForm("https://api.twitter.com/1.1/statuses/update.json",params)
+	resp, err := client.PostForm("https://api.twitter.com/1.1/statuses/update.json", params)
 	if err != nil {
 		return nil, err
 	}
@@ -98,8 +99,8 @@ func SendTweet(tweet string, reply_id string) (*Tweet, error) {
 	body, _ := ioutil.ReadAll(resp.Body)
 	fmt.Println(string(body))
 	err = json.Unmarshal(body, &responseTweet)
-	if err != nil{
-		return  nil,err
+	if err != nil {
+		return nil, err
 	}
 	return &responseTweet, nil
 }
