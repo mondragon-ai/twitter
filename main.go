@@ -184,18 +184,23 @@ func tweet(writer http.ResponseWriter, request *http.Request) {
 	// Add signature to OAuth parameters
 	oauthParams["oauth_signature"] = signature
 
+	fmt.Println(oauthParams)
+
 	// Construct Authorization header
 	authHeader := "OAuth "
 	for key, value := range oauthParams {
 		authHeader += fmt.Sprintf("%s=\"%s\", ", key, value)
 	}
 	authHeader = strings.TrimSuffix(authHeader, ", ")
+	fmt.Println(authHeader)
 
 	// Prepare tweet data
 	tweetData := map[string]string{
 		"text": "Hello World!",
 	}
+	fmt.Println(tweetData)
 	tweetJSON, _ := json.Marshal(tweetData)
+	fmt.Println(tweetJSON)
 
 	// Send tweet request
 	client := &http.Client{}
