@@ -10,8 +10,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
-	"strconv"
+	"sort"
 	"strings"
 	"time"
 
@@ -20,10 +21,10 @@ import (
 )
 
 var (
-    consumerKey    = os.Getenv("CONSUMER_KEY")
-    consumerSecret = os.Getenv("CONSUMER_SECRET")
-    accessTokenKey = os.Getenv("ACCESS_TOKEN_KEY")
-    accessTokenSecret = os.Getenv("ACCESS_TOKEN_SECRET")
+	consumerKey = os.Getenv("CONSUMER_KEY")
+	consumerSecret = os.Getenv("CONSUMER_SECRET")
+	accessTokenKey = os.Getenv("ACCESS_TOKEN_KEY")
+	accessTokenSecret = os.Getenv("ACCESS_TOKEN_SECRET")
 )
 
 
@@ -53,154 +54,48 @@ func main() {
 	server.ListenAndServe()
 }
 
-// func generateNonce() string {
-//     const nonceLength = 32
-//     encodedLength := base64.StdEncoding.EncodedLen(nonceLength)
-//     b := make([]byte, encodedLength)
-//     _, err := rand.Read(b)
-//     if err != nil {
-//         fmt.Println("Error generating nonce:", err)
-//         return ""
-//     }
-//     return base64.StdEncoding.EncodeToString(b)[:nonceLength]
-// }
+func GenerateOAuthNonce(length int) (string, error) {
+    // Generate random bytes
+    randomBytes := make([]byte, length)
+    _, err := rand.Read(randomBytes)
+    if err != nil {
+        return "", err
+    }
 
-func generateNonce() string {
-	const nonceLength = 32
-	b := make([]byte, nonceLength)
-	_, err := rand.Read(b)
-	if err != nil {
-		fmt.Println("Error generating nonce:", err)
-		return ""
-	}
-	return base64.StdEncoding.EncodeToString(b)
+    // Base64 encode the random bytes
+    base64Str := base64.StdEncoding.EncodeToString(randomBytes)
+
+    // Strip non-word characters
+    var result strings.Builder
+    for _, char := range base64Str {
+        if (char >= 'A' && char <= 'Z') || (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') {
+            result.WriteRune(char)
+        }
+    }
+
+    return result.String(), nil
 }
 
-// func tweet(writer http.ResponseWriter, request *http.Request) {
-// 	// Generate oauth_nonce
-//     oauthNonce := generateNonce()
-
-//     // Generate oauth_timestamp
-//     oauthTimestamp := strconv.FormatInt(time.Now().Unix(), 10)
-
-//     // Twitter API endpoint
-//     url := "https://api.twitter.com/2/tweets"
-
-//     // Construct OAuth parameters
-//     parameters := map[string]string{
-//         "oauth_consumer_key":     consumerKey,
-//         "oauth_nonce":            oauthNonce,
-//         "oauth_signature_method": "HMAC-SHA1",
-//         "oauth_timestamp":        oauthTimestamp,
-//         "oauth_token":            accessTokenKey,
-//         "oauth_version":          "1.0",
-//     }
-
-//     // Add query parameters to the parameters map
-//     queryValues := request.URL.Query()
-//     for key, values := range queryValues {
-//         parameters[key] = values[0] // Only consider the first value if there are multiple
-//     }
-
-//     // Generate signature base string
-//     signatureBaseString := fmt.Sprintf("%s&%s&", "POST", urlEncode(url))
-//     var parameterStrings []string
-//     for key, value := range parameters {
-//         parameterStrings = append(parameterStrings, fmt.Sprintf("%s=%s", urlEncode(key), urlEncode(value)))
-//     }
-//     signatureBaseString += urlEncode(strings.Join(parameterStrings, "&"))
-
-//     // Generate signing key
-//     signingKey := urlEncode(consumerSecret) + "&" + urlEncode(accessTokenSecret)
-
-//     // Generate signature
-//     signature := generateSignature(signatureBaseString, signingKey)
-
-//     // Construct OAuth header
-//     oauthHeader := fmt.Sprintf(`OAuth oauth_consumer_key="%s", oauth_nonce="%s", oauth_signature="%s", oauth_signature_method="HMAC-SHA1", oauth_timestamp="%s", oauth_token="%s", oauth_version="1.0"`,
-//         consumerKey, oauthNonce, urlEncode(signature), oauthTimestamp, accessTokenKey)
-
-//     tweetText := "TEST BODY"
-
-//     // Construct the request body
-//     requestBody := []byte(fmt.Sprintf(`{"text": "%s"}`, tweetText))
-
-//     // Create HTTP request
-//     req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
-//     if err != nil {
-//         fmt.Println("Error creating request:", err)
-//         return
-//     }
-//     // Set content type header
-//     req.Header.Set("Content-Type", "application/json")
-
-//     // Set authorization header
-//     req.Header.Set("Authorization", oauthHeader)
-
-//     // Make HTTP request
-//     client := &http.Client{}
-//     resp, err := client.Do(req)
-//     if err != nil {
-//         fmt.Println("Error making request:", err)
-//         return
-//     }
-//     defer resp.Body.Close()
-
-//     // Print response status
-//     fmt.Println("Response Status:", resp.Status)
-// }
-
-// func generateSignature(baseString, signingKey string) string {
-// 	hash := hmac.New(sha1.New, []byte(signingKey))
-// 	hash.Write([]byte(baseString))
-// 	signature := hash.Sum(nil)
-// 	return base64.StdEncoding.EncodeToString(signature)
-// }
-
-// func urlEncode(s string) string {
-// 	return strings.ReplaceAll(base64.URLEncoding.EncodeToString([]byte(s)), "=", "%3D")
-// }
 
 func tweet(writer http.ResponseWriter, request *http.Request) {
-	// Construct OAuth parameters
-	oauthNonce := generateNonce()
-	oauthTimestamp := strconv.FormatInt(time.Now().Unix(), 10)
 
-	oauthParams := map[string]string{
-		"oauth_consumer_key":     consumerKey,
-		"oauth_token":            accessTokenKey,
-		"oauth_signature_method": "HMAC-SHA1",
-		"oauth_timestamp":        oauthTimestamp,
-		"oauth_nonce":            oauthNonce,
-		"oauth_version":          "1.0",
-	}
-
-	// Generate base string
-	baseString := generateBaseString(request.Method, request.URL.String(), oauthParams)
+	// Retrieve environment variables
+	consumerKey = os.Getenv("CONSUMER_KEY")
+	consumerSecret = os.Getenv("CONSUMER_SECRET")
+	accessTokenKey = os.Getenv("ACCESS_TOKEN_KEY")
+	accessTokenSecret = os.Getenv("ACCESS_TOKEN_SECRET")
 
 	// Generate signature
-	signature := generateSignature(baseString, consumerSecret, accessTokenSecret)
-
-	// Add signature to OAuth parameters
-	oauthParams["oauth_signature"] = signature
-
-	fmt.Println(oauthParams)
-
-	// Construct Authorization header
-	authHeader := "OAuth "
-	for key, value := range oauthParams {
-		authHeader += fmt.Sprintf("%s=\"%s\", ", key, value)
-	}
-	authHeader = strings.TrimSuffix(authHeader, ", ")
-	fmt.Println(authHeader)
+	// signature := generateSignature(baseString, consumerSecret, accessTokenSecret)
+    signature := prepareOAuthSignature(consumerKey, accessTokenKey, consumerSecret, accessTokenSecret)
+	fmt.Println("[signature]")
+	fmt.Println(signature)
 
 	// Prepare tweet data
 	tweetData := map[string]string{
 		"text": "Hello World!",
 	}
-	fmt.Println(tweetData)
 	tweetJSON, _ := json.Marshal(tweetData)
-	fmt.Println(tweetJSON)
 
 	// Send tweet request
 	client := &http.Client{}
@@ -209,7 +104,7 @@ func tweet(writer http.ResponseWriter, request *http.Request) {
 		log.Fatal("Error creating request: ", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", authHeader)
+	req.Header.Set("Authorization", signature)
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -220,179 +115,114 @@ func tweet(writer http.ResponseWriter, request *http.Request) {
 	// Print response
 	fmt.Println("Response Status:", resp.Status)
 }
+func generateSignature(method, baseURL string, consumerSecret, tokenSecret string) (string, error) {
+	// Step 1: Collect parameters and encode them
+    // Step 4: Create base string
+    baseString := strings.ToUpper(method) + "&" + url.QueryEscape(baseURL)
 
-// func generateNonce() string {
-// 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-// 	nonce := make([]byte, 32)
-// 	for i := range nonce {
-// 		nonce[i] = charset[rand.Intn(len(charset))]
-// 	}
-// 	return string(nonce)
-// }
 
-func generateBaseString(method, urlStr string, params map[string]string) string {
-	var paramString string
-	for key, value := range params {
-		paramString += key + "=" + value + "&"
-	}
-	paramString = strings.TrimSuffix(paramString, "&")
+    // Step 5: Create signing key
+    signingKey := url.QueryEscape(consumerSecret) + "&" + url.QueryEscape(tokenSecret)
 
-	return fmt.Sprintf("%s&%s&%s", method, urlStr, strings.ReplaceAll(paramString, "=", "%3D"))
+    // Step 6: Calculate signature
+    h := hmac.New(sha1.New, []byte(signingKey))
+    h.Write([]byte(baseString))
+    signature := h.Sum(nil)
+
+    // Step 7: Base64 encode the signature
+    encodedSignature := base64.StdEncoding.EncodeToString(signature)
+
+    return encodedSignature, nil
 }
 
-func generateSignature(baseString, consumerSecret, tokenSecret string) string {
-	signingKey := consumerSecret + "&" + tokenSecret
-	h := hmac.New(sha1.New, []byte(signingKey))
-	h.Write([]byte(baseString))
-	signature := base64.StdEncoding.EncodeToString(h.Sum(nil))
-	return signature
+
+func prepareOAuthSignature(oauthConsumerKey, oauthToken, consumerSecret, tokenSecret string) string {
+    // Constants
+    oauthSignatureMethod := "HMAC-SHA1"
+    oauthVersion := "1.0"
+    oauthNonce := "qac8abeMCg8" // Assuming you have your way of generating nonce
+    oauthTimestamp := fmt.Sprintf("%d", time.Now().Unix())
+
+    // Collect parameters
+    params := map[string]string{
+        "oauth_consumer_key":     oauthConsumerKey,
+        "oauth_token":            oauthToken,
+        "oauth_signature_method": oauthSignatureMethod,
+        "oauth_timestamp":        oauthTimestamp,
+        "oauth_nonce":            oauthNonce,
+        "oauth_version":          oauthVersion,
+    }
+
+    // Sort parameters by key
+    var keys []string
+    for k := range params {
+        keys = append(keys, k)
+    }
+    sort.Strings(keys)
+
+    // Construct parameter string
+    var paramStr strings.Builder
+    for _, k := range keys {
+        if paramStr.Len() > 0 {
+            paramStr.WriteString("&")
+        }
+        paramStr.WriteString(url.QueryEscape(k))
+        paramStr.WriteString("=")
+        paramStr.WriteString(url.QueryEscape(params[k]))
+    }
+	fmt.Println("[paramStr]")
+	fmt.Println(paramStr)
+	
+
+    // Construct signature base string
+    httpMethod := "POST"
+    baseURL := "https://api.twitter.com/2/tweets"
+    baseStr := fmt.Sprintf("%s&%s&%s", httpMethod, url.QueryEscape(baseURL), url.QueryEscape(paramStr.String()))
+	fmt.Println("[baseStr]")
+	fmt.Println(baseStr)
+
+    // Construct signing key
+    signingKey := fmt.Sprintf("%s&%s", url.QueryEscape(consumerSecret), url.QueryEscape(tokenSecret))
+	fmt.Println("[signingKey]")
+	fmt.Println(signingKey)
+
+    // Calculate signature
+    h := hmac.New(sha1.New, []byte(signingKey))
+    h.Write([]byte(baseStr))
+    signature := base64.StdEncoding.EncodeToString(h.Sum(nil))
+
+    // Construct authorization header
+    var authHeader strings.Builder
+    authHeader.WriteString(`OAuth oauth_consumer_key="`)
+    authHeader.WriteString(url.QueryEscape(oauthConsumerKey))
+    authHeader.WriteString(`", oauth_token="`)
+    authHeader.WriteString(url.QueryEscape(oauthToken))
+    authHeader.WriteString(`", oauth_signature_method="`)
+    authHeader.WriteString(url.QueryEscape(oauthSignatureMethod))
+    authHeader.WriteString(`", oauth_timestamp="`)
+    authHeader.WriteString(url.QueryEscape(oauthTimestamp))
+    authHeader.WriteString(`", oauth_nonce="`)
+    authHeader.WriteString(url.QueryEscape(oauthNonce))
+    authHeader.WriteString(`", oauth_version="`)
+    authHeader.WriteString(url.QueryEscape(oauthVersion))
+    authHeader.WriteString(`", oauth_signature="`)
+    authHeader.WriteString(url.QueryEscape(signature))
+    authHeader.WriteString(`"`)
+
+    return authHeader.String()
 }
-// func tweet(writer http.ResponseWriter, request *http.Request) {
-//     // Prepare the request body
-//     requestBody := strings.NewReader(`{"text": "Hello World!"}`)
 
-//     // Create OAuth1 configuration
-//     config := oauth1.NewConfig(consumerKey, consumerSecret)
-//     token := oauth1.NewToken(accessTokenKey, accessTokenSecret)
-//     httpClient := config.Client(oauth1.NoContext, token)
+func percentEncode(src string) string {
+    var encoded strings.Builder
 
-//     // Prepare the HTTP request
-//     req, err := http.NewRequest("POST", "https://api.twitter.com/2/tweets", requestBody)
-//     if err != nil {
-//         http.Error(writer, err.Error(), http.StatusInternalServerError)
-//         return
-//     }
+    for _, b := range src {
+        switch {
+        case (b >= '0' && b <= '9') || (b >= 'A' && b <= 'Z') || (b >= 'a' && b <= 'z') || b == '-' || b == '.' || b == '_' || b == '~':
+            encoded.WriteRune(b)
+        default:
+            encoded.WriteString(fmt.Sprintf("%%%X", b))
+        }
+    }
 
-//     // Set request headers
-//     req.Header.Set("Content-Type", "application/json")
-
-//     // Send the HTTP request
-//     response, err := httpClient.Do(req)
-//     if err != nil {
-//         http.Error(writer, err.Error(), http.StatusInternalServerError)
-//         return
-//     }
-//     defer response.Body.Close()
-
-//     // Read response body
-//     responseData, err := ioutil.ReadAll(response.Body)
-//     if err != nil {
-//         http.Error(writer, err.Error(), http.StatusInternalServerError)
-//         return
-//     }
-
-//     // Write response back to the client
-//     writer.WriteHeader(response.StatusCode)
-//     writer.Write(responseData)
-// }
-
-// func tweet(writer http.ResponseWriter, request *http.Request) {
-// 	requestTokenURL := "https://api.twitter.com/oauth/request_token?oauth_callback=oob&x_auth_access_type=write"
-// 	accessTokenURL := "https://api.twitter.com/oauth/access_token"
-// 	tweetURL := "https://api.twitter.com/2/tweets"
-
-// 	// Get request token
-// 	oauthConfig := &oauth1.Config{
-// 		ConsumerKey:    consumerKey,
-// 		ConsumerSecret: consumerSecret,
-// 		CallbackURL:    "oob",
-// 		Endpoint: oauth1.Endpoint{
-// 			RequestTokenURL: requestTokenURL,
-// 			AuthorizeURL:    "",
-// 			AccessTokenURL:  accessTokenURL,
-// 		},
-// 	}
-// 	requestToken, _, err := oauthConfig.RequestToken()
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	authURL, err := oauthConfig.AuthorizationURL(requestToken)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	fmt.Println("Please go here and authorize:", authURL)
-
-// 	// Get verifier
-// 	reader := bufio.NewReader(os.Stdin)
-// 	fmt.Print("Paste the PIN here: ")
-// 	verifier, _ := reader.ReadString('\n')
-// 	verifier = strings.TrimSpace(verifier)
-
-// 	// Get access token
-// 	accessToken, accessSecret, err := oauthConfig.AccessToken(requestToken, "", verifier)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	// Make tweet request
-// 	token := oauth1.NewToken(accessToken, accessSecret)
-// 	client := oauthConfig.Client(oauth1.NoContext, token)
-// 	req, err := http.NewRequest("POST", tweetURL, strings.NewReader(`{"text": "Hello world!"}`))
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	req.Header.Set("Content-Type", "application/json")
-
-// 	resp, err := client.Do(req)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	defer resp.Body.Close()
-
-// 	body, err := ioutil.ReadAll(resp.Body)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	fmt.Fprintf(writer, "%s\n", body)
-// }
-
-
-
-// func WebhookHandler(writer http.ResponseWriter, request *http.Request) {
-// 	fmt.Println("Handler called")
-// 	//Read the body of the tweet
-// 	body, _ := ioutil.ReadAll(request.Body)
-// 	//Initialize a webhok load obhject for json decoding
-// 	var load WebhookLoad
-// 	err := json.Unmarshal(body, &load)
-// 	if err != nil {
-// 		fmt.Println("An error occured: " + err.Error())
-// 	}
-// 	//Check if it was a tweet_create_event and tweet was in the payload and it was not tweeted by the bot
-// 	if len(load.TweetCreateEvent) < 1 || load.UserId == load.TweetCreateEvent[0].User.IdStr {
-// 		return
-// 	}
-// 	//Send Hello world as a reply to the tweet, replies need to begin with the handles
-// 	//of accounts they are replying to
-// 	_, err = SendTweet("@"+load.TweetCreateEvent[0].User.Handle+" Hello World", load.TweetCreateEvent[0].IdStr)
-// 	if err != nil {
-// 		fmt.Println("An error occured:")
-// 		fmt.Println(err.Error())
-// 	} else {
-// 		fmt.Println("Tweet sent successfully")
-// 	}
-// }
-
-// func CrcCheck(writer http.ResponseWriter, request *http.Request) {
-// 	//Set response header to json type
-// 	writer.Header().Set("Content-Type", "application/json")
-// 	//Get crc token in parameter
-// 	token := request.URL.Query()["crc_token"]
-// 	if len(token) < 1 {
-// 		fmt.Fprintf(writer, "No crc_token given")
-// 		return
-// 	}
-
-// 	//Encrypt and encode in base 64 then return
-// 	h := hmac.New(sha256.New, []byte(os.Getenv("CONSUMER_SECRET")))
-// 	h.Write([]byte(token[0]))
-// 	encoded := base64.StdEncoding.EncodeToString(h.Sum(nil))
-// 	//Generate response string map
-// 	response := make(map[string]string)
-// 	response["response_token"] = "sha256=" + encoded
-// 	//Turn response map to json and send it to the writer
-// 	responseJson, _ := json.Marshal(response)
-// 	fmt.Fprintf(writer, string(responseJson))
-// }
+    return encoded.String()
+}
