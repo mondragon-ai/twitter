@@ -13,8 +13,10 @@ type OpenAIRequest struct {
 	Prompt           string   `json:"prompt"`
 	MaxTokens        int      `json:"max_tokens"`
 	Temperature      float64  `json:"temperature"`
+	Top      float64  `json:"top_p"`
 	Model            string   `json:"model"`
 	FrequencyPenalty int      `json:"frequency_penalty"`
+	PresencePenalty int      `json:"presence_penalty"`
 	Stop             []string `json:"stop"` 
 }
 
@@ -40,16 +42,18 @@ type OpenAIResponse struct {
 // Function to call OpenAI API for chat completion
 func OpenAIChatCompletion(prompt string) (string, error) {
 	requestBody, _ := json.Marshal(OpenAIRequest{
-		Model:            "davinci-002",
-		FrequencyPenalty: 1,
+		Model:            "gpt-3.5-turbo-instruct",
+		FrequencyPenalty: 0,
 		Prompt:           prompt,
-		MaxTokens:        50,
-		Temperature:      0.2,
+		PresencePenalty:  0,
+		MaxTokens:        70,
+		Temperature:      1,
 	})
 
 	openaiKey := os.Getenv("OPENAI_API_KEY")
 	req, err := http.NewRequest("POST", "https://api.openai.com/v1/completions", bytes.NewBuffer(requestBody))
 	if err != nil {
+		fmt.Println(err)
 		return "", err
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -58,6 +62,7 @@ func OpenAIChatCompletion(prompt string) (string, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
+		fmt.Println(err)
 		return "", err
 	}
 	defer resp.Body.Close()
@@ -65,12 +70,13 @@ func OpenAIChatCompletion(prompt string) (string, error) {
 	var response OpenAIResponse
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
+		fmt.Println(err)
 		return "", err
 	}
-	fmt.Println(req)
-	fmt.Println(response.Choices[0].Text)
+
 
 	if len(response.Choices) > 0 {
+		fmt.Println(response.Choices[0].Text)
 		return response.Choices[0].Text, nil
 	}
 
