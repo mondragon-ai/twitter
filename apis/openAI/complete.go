@@ -46,14 +46,13 @@ func OpenAIChatCompletion(prompt string) (string, error) {
 		FrequencyPenalty: 0,
 		Prompt:           prompt,
 		PresencePenalty:  0,
-		MaxTokens:        70,
+		MaxTokens:        50,
 		Temperature:      1,
 	})
 
 	openaiKey := os.Getenv("OPENAI_API_KEY")
 	req, err := http.NewRequest("POST", "https://api.openai.com/v1/completions", bytes.NewBuffer(requestBody))
 	if err != nil {
-		fmt.Println(err)
 		return "", err
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -62,7 +61,6 @@ func OpenAIChatCompletion(prompt string) (string, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err)
 		return "", err
 	}
 	defer resp.Body.Close()
@@ -70,13 +68,12 @@ func OpenAIChatCompletion(prompt string) (string, error) {
 	var response OpenAIResponse
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
-		fmt.Println(err)
 		return "", err
 	}
-
+	fmt.Println(req)
+	fmt.Println(response.Choices[0].Text)
 
 	if len(response.Choices) > 0 {
-		fmt.Println(response.Choices[0].Text)
 		return response.Choices[0].Text, nil
 	}
 
