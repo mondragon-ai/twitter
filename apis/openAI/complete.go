@@ -70,10 +70,9 @@ func OpenAIChatCompletion(prompt string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Println(req)
-	fmt.Println(response.Choices[0].Text)
 
 	if len(response.Choices) > 0 {
+		fmt.Println(response.Choices[0].Text)
 		return response.Choices[0].Text, nil
 	}
 

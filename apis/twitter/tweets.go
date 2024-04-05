@@ -183,3 +183,48 @@ func Tweet(writer http.ResponseWriter, request *http.Request) {
 	// Print response
 	fmt.Println("Response Status:", resp.Status)
 }
+
+
+
+func Post() {
+
+	// Retrieve environment variables
+	consumerKey = os.Getenv("CONSUMER_KEY")
+	consumerSecret = os.Getenv("CONSUMER_SECRET")
+	accessTokenKey = os.Getenv("ACCESS_TOKEN_KEY")
+	accessTokenSecret = os.Getenv("ACCESS_TOKEN_SECRET")
+
+	// Generate signature
+    signature := auth.PrepareOAuthSignature(consumerKey, accessTokenKey, consumerSecret, accessTokenSecret)
+
+	prompt := insertRandomTopicIntoPrompt()
+	completion, err := openai.OpenAIChatCompletion(prompt)
+	if err != nil {
+		log.Fatal("Error creating request: ", err)
+		return
+	}
+
+	// Prepare tweet data
+	tweetData := map[string]string{
+		"text": strings.Replace(completion, "\"", "", -1),
+	}
+	tweetJSON, _ := json.Marshal(tweetData)
+
+	// Send tweet request
+	client := &http.Client{}
+	req, err := http.NewRequest("POST", "https://api.twitter.com/2/tweets", bytes.NewBuffer(tweetJSON))
+	if err != nil {
+		log.Fatal("Error creating request: ", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", signature)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal("Error sending request: ", err)
+	}
+	defer resp.Body.Close()
+
+	// Print response
+	fmt.Println("Response Status:", resp.Status)
+}
