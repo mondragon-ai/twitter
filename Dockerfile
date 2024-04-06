@@ -17,4 +17,4 @@ RUN go build -o ./out/dist .
 
 # EXPOSE 8080
 
-CMD ./out/dist
+CMD PORT=$PORT ./out/dist
