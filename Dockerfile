@@ -15,6 +15,7 @@ COPY . .
 # Build the application
 RUN go build -o ./out/dist .
 
-# EXPOSE 8080
+# Expose the port your application listens on
+EXPOSE 8080
 
-CMD PORT=$PORT ./out/dist
+CMD ./out/dist
