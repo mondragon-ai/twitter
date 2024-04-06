@@ -37,7 +37,15 @@ func main() {
 	server := &http.Server{
 		Handler: m,
 	}
-	server.Addr = ":8080"
+
+    // Retrieve the port from the environment variable or default to 8080
+    port := os.Getenv("PORT")
+    if port == "" {
+        port = "8080"
+    }
+
+    server.Addr = ":" + port
+	// server.Addr = ":8080"
 
 	// Setup Cron job
 	c := cron.New()
