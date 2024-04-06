@@ -42,7 +42,7 @@ func main() {
 
 	// Setup Cron job
 	c := cron.New()
-	c.AddFunc("30 * * * *", func() {
+	c.AddFunc("*/2 * * * * *", func() {
 		fmt.Println("Ready to Tweet...")
 		if shouldPost() && isWithinAllowedTimezone() {
 			fmt.Println("[TWEETED]")

@@ -46,7 +46,7 @@ func OpenAIChatCompletion(prompt string) (string, error) {
 		FrequencyPenalty: 0,
 		Prompt:           prompt,
 		PresencePenalty:  0,
-		MaxTokens:        50,
+		MaxTokens:        70,
 		Temperature:      1,
 	})
 
