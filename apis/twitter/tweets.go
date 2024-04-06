@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/twitter/apis/openai"
+	openai "github.com/twitter/apis/openAI"
 	"github.com/twitter/auth"
 )
 

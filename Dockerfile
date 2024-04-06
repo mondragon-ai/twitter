@@ -2,12 +2,19 @@ FROM golang:1.22.0
 
 WORKDIR /app
 
-COPY . .
+# Copy go.mod and go.sum files
+COPY go.mod .
+COPY go.sum .
 
+# Download dependencies
 RUN go mod download
 
-RUN go build -o /godocker
+# Copy the rest of the application
+COPY . .
 
-EXPOSE 8080
+# Build the application
+RUN go build -o ./out/dist .
 
-CMD [ "/godocker" ]
+# EXPOSE 8080
+
+CMD ./out/dist
