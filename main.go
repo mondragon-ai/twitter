@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 	"github.com/robfig/cron"
 	"github.com/twitter/apis/twitter"
 )
@@ -19,11 +18,11 @@ import (
 
 func main() {
 	//Load env
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-		fmt.Println("Error loading .env file")
-	}
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Fatal("Error loading .env file")
+	// 	fmt.Println("Error loading .env file")
+	// }
 
 	fmt.Println("Starting Server")
 
@@ -42,7 +41,7 @@ func main() {
 
 	// Setup Cron job
 	c := cron.New()
-	c.AddFunc("*/2 * * * * *", func() {
+	c.AddFunc("0 30 * * * *", func() {
 		fmt.Println("Ready to Tweet...")
 		if shouldPost() && isWithinAllowedTimezone() {
 			fmt.Println("[TWEETED]")
