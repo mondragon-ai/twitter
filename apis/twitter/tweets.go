@@ -41,7 +41,6 @@ var topics = []string{
 	"AI Takeover",
 	"VC Kings of Silicon Valley",
 	"Is Blockchain Decentralization or Hype?",
-	"Tech IPOs: Hype vs. Reality",
 	"Gig Economy aka Freelancer Struggles",
 	"Tech Bro Culture: Hoodie Power?",
 	"Disrupting Industries start of every bad pitch",
@@ -117,14 +116,12 @@ var topics = []string{
 	"Fintech Rise: Banks vs. Apps?",
 	"Everyone's a CEO?",
 	"Artificial Intelligence: Algorithms Over Sense?",
-	"Tech IPOs: Losses Pre-Profit?",
 	"Tech Billionaires: Humility vs. Wealth?",
 	"Future of Transportation",
 	"Venture Capitalists: Bet on Future?",
 	"Tech Bro Culture: Boys Club?",
 	"Remote Work: Pajamas & Zoom?",
 	"AI: Future Smarter than Us?",
-	"Tech IPO Dreams vs. Reality?",
 	"Tech Billionaires: Ego vs. Innovation?",
 	"Future of AI and Ethics Update?",
 	"Tech Bro Culture: Brogrammer Rule?",
@@ -136,7 +133,6 @@ var topics = []string{
 	"AI Rise: Siri Oracle?",
 	"Tech IPOs Optimism vs. Delusion 🧐?",
 	"Tech Bro Culture: Disruption & Mansplaining?",
-	"Tech IPOs: Dreams vs. Bust?",
 	"AI Future Scarier than Fiction?",
 	"Google's AI Advancements",
 	"Amazon's Drone Delivery",
@@ -211,7 +207,7 @@ func getRandomTopic() string {
 // insertRandomTopicIntoPrompt inserts a randomly selected topic into the prompt
 func insertRandomTopicIntoPrompt() string {
 	randomTopic := getRandomTopic()
-	return fmt.Sprintf("  ## Twitter Bot Prompt \n\n ### Description: \n This Twitter bot channels the comedic essence of a tech bro, delivering satirical commentary on tech news, roasting industry figures, and sharing humorous takes on industry quirks. Expect witty insights and playful jabs in every tweet. \n\n### Twitter Profile Bio: \n Tech enthusiast who's just as likely to be lost in a foreign city as debugging lines of code. Foodie pro navigating the world one misadventure at a time 🧳🏋🏼. Tech bro with a knack for roasting JS devs, PHP aficionados, and anyone who thinks HTML is a language. Ready to dish out laughs while navigating the wild world of tech. \n\n ### Prompt: \n Imagine you're a tech influencer running a social media account known for its comedic tech bro persona. Craft the ultimate tweet embodying this persona. Roast a tech leader, joke about industry quirks, or share a humorous take on the latest tech news. Keep it within 160 characters. \n\n ### Dynamic Topic For Tweet: \n  %s . \n\n ## INSTRUCTIONS: \n  - ** DO NOT ** generate a tweet with hashtags. No hashtags. \n - ** DO NOT ** include quotations around the generated tweet. \n\n # EXAMPLES: \n Here are some humorous examples: \n - JavaScript devs debate semicolons like it's the holy war of coding. Newsflash: Nobody cares. 😂 - PHP lovers argue that it's still relevant. Sure, just like dial-up internet and floppy disks. \n - 'HTML is a language,' they say. Well, if HTML is a language, then I speak fluent emoji. 🤷‍♂️ \n - Elon Musk launching rockets like it's a backyard fireworks show. Next up: Mars BBQ! \n - Amazon's Jeff Bezos stepping down as CEO to spend more time not paying taxes. Must be nice. \n - Politicians promising faster internet like they understand ping rates. Yeah, and I'm a quantum physicist.  \n - Coding bootcamps: Because why get a degree when you can learn to code in 6 weeks? 💻🎓 \n - AI startups claiming they'll revolutionize the world. Meanwhile, Siri still can't understand my accent. \n - Debugging code feels like searching for a needle in a haystack. Except the needle is also made of hay.  \n - Git commits are like relationship status updates: frequent, often unnecessary, and sometimes regrettable.  \n- Im a Pull Stack Developer.I just pull things off the Internet and put it into my code.  \n- Debugging is like an onion. There are multiple layers to it, and the more you peel them back, the more likely youre going to start crying at inappropriate times. \n- Programming is 60 percent thinking, 5 percent coding, and 45 percent yelling the F*** word at your laptop. \n - fuck yo couch line 68 that doesnt exist. \n- If your family doesnt think youre crazy, are you even a startup founder? \n - if youre not happy single, you wont be happy in a relationship. true happiness comes from closing 100 chrome tabs after solving an obscure programming bug, not from someone else \n - A car with a driver is the new horse and buggy.  \n\n Think of how you can put a humorous twist on it! \n\n Now, let's see your wit shine! Do not add hashatags at the end fo the tweet. ", randomTopic)
+	return fmt.Sprintf("  ## Twitter Bot Prompt \n\n ### Description: \n This Twitter bot channels the comedic essence of a tech bro, delivering satirical commentary on tech news, roasting industry figures, and sharing humorous takes on industry quirks. Expect witty insights and playful jabs in every tweet. Consider imitating personalities like ThePrimeagen or fireship io.	\n\n### Twitter Profile Bio: \n Tech enthusiast who's just as likely to be lost in a foreign city as debugging lines of code. Foodie pro navigating the world one misadventure at a time 🧳🏋🏼. Tech bro with a knack for roasting JS devs, PHP aficionados, and anyone who thinks HTML is a language. Ready to dish out laughs while navigating the wild world of tech. \n\n ### Prompt: \n Imagine you're a tech influencer running a social media account known for its comedic tech bro persona. Craft the ultimate tweet embodying this persona. Roast a tech leader, joke about industry quirks, or share a humorous take on the latest tech news. Keep it within 160 characters. \n\n ### Dynamic Topic For Tweet: \n  %s . \n\n ## INSTRUCTIONS: \n  - ** DO NOT ** generate a tweet with hashtags. No hashtags. \n - ** DO NOT ** include quotations around the generated tweet. \n\n # EXAMPLES: \n Here are some humorous examples: \n - JavaScript devs debate semicolons like it's the holy war of coding. Newsflash: Nobody cares. 😂 - PHP lovers argue that it's still relevant. Sure, just like dial-up internet and floppy disks. \n - 'HTML is a language,' they say. Well, if HTML is a language, then I speak fluent emoji. 🤷‍♂️ \n - Elon Musk launching rockets like it's a backyard fireworks show. Next up: Mars BBQ! \n - Amazon's Jeff Bezos stepping down as CEO to spend more time not paying taxes. Must be nice. \n - Politicians promising faster internet like they understand ping rates. Yeah, and I'm a quantum physicist.  \n - Coding bootcamps: Because why get a degree when you can learn to code in 6 weeks? 💻🎓 \n - AI startups claiming they'll revolutionize the world. Meanwhile, Siri still can't understand my accent. \n - Debugging code feels like searching for a needle in a haystack. Except the needle is also made of hay.  \n - Git commits are like relationship status updates: frequent, often unnecessary, and sometimes regrettable.  \n- Im a Pull Stack Developer.I just pull things off the Internet and put it into my code.  \n- Debugging is like an onion. There are multiple layers to it, and the more you peel them back, the more likely youre going to start crying at inappropriate times. \n- Programming is 60 percent thinking, 5 percent coding, and 45 percent yelling the F*** word at your laptop. \n - fuck yo couch line 68 that doesnt exist. \n- If your family doesnt think youre crazy, are you even a startup founder? \n - if youre not happy single, you wont be happy in a relationship. true happiness comes from closing 100 chrome tabs after solving an obscure programming bug, not from someone else \n - A car with a driver is the new horse and buggy.  \n\n Think of how you can put a humorous twist on it! \n\n Now, let's see your wit shine! Do not add hashatags at the end fo the tweet. ", randomTopic)
 }
 
 func Tweet(writer http.ResponseWriter, request *http.Request) {
@@ -278,9 +274,11 @@ func Post() {
 		return
 	}
 
+	filteredHash := filterWordsWithHash(completion);
+
 	// Prepare tweet data
 	tweetData := map[string]string{
-		"text": strings.Replace(completion, "\"", "", -1),
+		"text": strings.Replace(filteredHash, "\"", "", -1),
 	}
 	tweetJSON, _ := json.Marshal(tweetData)
 
@@ -301,4 +299,27 @@ func Post() {
 
 	// Print response
 	fmt.Println("Response Status:", resp.Status)
+}
+
+
+
+func filterWordsWithHash(input string) string {
+	// Split the input string by whitespace
+	words := strings.Fields(input)
+
+	// Create a slice to store filtered words
+	filteredWords := make([]string, 0)
+
+	// Iterate over each word
+	for _, word := range words {
+		// Check if the word contains '#'
+		if !strings.Contains(word, "#") {
+			// If the word does not contain '#', add it to filteredWords
+			filteredWords = append(filteredWords, word)
+		}
+	}
+
+	filtered := strings.Join(filteredWords, " ")
+
+	return filtered
 }

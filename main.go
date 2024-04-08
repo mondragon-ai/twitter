@@ -83,8 +83,8 @@ func main() {
 func shouldPost() bool {
     // You can adjust the weights as needed.
     weights := map[bool]int{
-        true:  7,  
-        false: 3, 
+        true:  6,  
+        false: 4, 
     }
     totalWeight := 0
     for _, weight := range weights {
@@ -110,3 +110,4 @@ func isWithinAllowedTimezone() bool {
     hour := current.Hour()
     return hour >= 5 && hour < 23 
 }
+

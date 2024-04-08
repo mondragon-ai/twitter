@@ -15,7 +15,8 @@ COPY . .
 # Build the application
 RUN go build -o ./out/dist .
 
-# Expose the port your application listens on
-EXPOSE 8080
+# Build the application
+RUN go build -o ./out/dist .
 
-CMD ./out/dist
+# Command to run the executable
+CMD ["./out/dist"]
