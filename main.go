@@ -7,8 +7,10 @@ import (
 	"os"
 
 	"github.com/twitter/config"
+	"github.com/twitter/controller"
 	"github.com/twitter/helper"
 	"github.com/twitter/mentions"
+	"github.com/twitter/router"
 	"github.com/twitter/service"
 )
 
@@ -22,9 +24,7 @@ func main() {
 
 	// database
 	db, err := config.DatabaseConnection(connString)
-	if err != nil {
-		fmt.Errorf("DB Connection Failed")
-	}
+	helper.PanicIfError(err)
 
 	// repository
 	mentionepository := mentions.NewMentionRepository(db)
@@ -40,7 +40,7 @@ func main() {
 
 	server := http.Server{Addr: "localhost:8888", Handler: routes}
 
-	err := server.ListenAndServe()
+	err = server.ListenAndServe()
 	helper.PanicIfError(err)
 
 }
