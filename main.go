@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/joho/godotenv"
+
 	"github.com/twitter/config"
 	"github.com/twitter/controller"
 	"github.com/twitter/helper"
@@ -15,6 +17,8 @@ import (
 )
 
 func main() {
+
+	godotenv.Load(".env")
 	fmt.Printf("Start server")
 
 	connString := os.Getenv("DATABASE_URL")
