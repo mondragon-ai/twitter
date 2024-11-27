@@ -2,7 +2,6 @@ package controller
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/julienschmidt/httprouter"
 
@@ -36,11 +35,9 @@ func (controller *BookController) Create(writer http.ResponseWriter, requests *h
 
 
 func (controller *BookController) Delete(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
-	bookId := params.ByName("bookId")
-	id, err := strconv.Atoi(bookId)
-	helper.PanicIfError(err)
+	mentionId := params.ByName("mentionId")
 
-	controller.BookService.Delete(requests.Context(), id)
+	controller.BookService.Delete(requests.Context(), mentionId)
 	webResponse := response.WebResponse{
 		Code:   200,
 		Status: "Ok",
@@ -63,11 +60,9 @@ func (controller *BookController) FindAll(writer http.ResponseWriter, requests *
 }
 
 func (controller *BookController) FindById(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
-	bookId := params.ByName("bookId")
-	id, err := strconv.Atoi(bookId)
-	helper.PanicIfError(err)
+	mentionId := params.ByName("mentionId")
 
-	result := controller.BookService.FindById(requests.Context(), id)
+	result := controller.BookService.FindById(requests.Context(), mentionId)
 	webResponse := response.WebResponse{
 		Code:   200,
 		Status: "Ok",

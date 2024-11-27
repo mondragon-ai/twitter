@@ -1,6 +1,8 @@
 package response
 
 type MentionResponse struct {
-	Id   int    `json:"id"`
-	Tweet string `json:"tweet"`
+	ID      string `json:"id"`
+	Content string `json:"content"`
+	Author  string `json:"author"`
+	Created string `json:"created"` 
 }

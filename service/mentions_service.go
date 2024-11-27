@@ -9,7 +9,7 @@ import (
 
 type MentionService interface {
 	Create(ctx context.Context, request request.MentionCreateRequest)
-	Delete(ctx context.Context, bookId int)
-	FindById(ctx context.Context, bookId int) response.MentionResponse
+	Delete(ctx context.Context, bookId string)
+	FindById(ctx context.Context, bookId string) response.MentionResponse
 	FindAll(ctx context.Context) []response.MentionResponse
 }

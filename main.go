@@ -31,7 +31,7 @@ func main() {
 	helper.PanicIfError(err)
 
 	// repository
-	mentionepository := mentions.NewMentionRepository(db)
+	mentionepository := mentions.MentionCrud(db)
 
 	// service
 	bookService := service.NewMentionServiceImpl(mentionepository)

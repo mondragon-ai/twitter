@@ -10,38 +10,38 @@ import (
 	"github.com/twitter/model"
 )
 
-type BookServiceImpl struct {
-	BookRepository mentions.MentionRepository
+type MentionsServiceImpl struct {
+	MentionRepository mentions.MentionRepository
 }
 
-func NewMentionServiceImpl(bookRepository mentions.MentionRepository) MentionService {
-	return &BookServiceImpl{BookRepository: bookRepository}
+func NewMentionServiceImpl(MentionRepository mentions.MentionRepository) MentionService {
+	return &MentionsServiceImpl{MentionRepository: MentionRepository}
 }
 
 // Create implements BookService
-func (b *BookServiceImpl) Create(ctx context.Context, request request.MentionCreateRequest) {
+func (b *MentionsServiceImpl) Create(ctx context.Context, request request.MentionCreateRequest) {
 	book := model.Mention{
-		Id: request.ID,
-		Tweet: request.Tweet,
+		ID: request.ID,
+		Content: request.Content,
 	}
-	b.BookRepository.Save(ctx, book)
+	b.MentionRepository.Save(ctx, book)
 }
 
 // Delete implements BookService
-func (b *BookServiceImpl) Delete(ctx context.Context, bookId int) {
-	mention, err := b.BookRepository.FindById(ctx, bookId)
+func (b *MentionsServiceImpl) Delete(ctx context.Context, mentionId string) {
+	mention, err := b.MentionRepository.FindById(ctx, mentionId)
 	helper.PanicIfError(err)
-	b.BookRepository.Delete(ctx, mention.Id)
+	b.MentionRepository.Delete(ctx, mention.ID)
 }
 
 // FindAll implements BookService
-func (b *BookServiceImpl) FindAll(ctx context.Context) []response.MentionResponse {
-	books := b.BookRepository.FindAll(ctx)
+func (b *MentionsServiceImpl) FindAll(ctx context.Context) []response.MentionResponse {
+	books := b.MentionRepository.FindAll(ctx)
 
 	var bookResp []response.MentionResponse
 
 	for _, value := range books {
-		book := response.MentionResponse{Id: value.Id, Tweet: value.Tweet}
+		book := response.MentionResponse{ID: value.ID, Content: value.Content}
 		bookResp = append(bookResp, book)
 	}
 	return bookResp
@@ -49,17 +49,8 @@ func (b *BookServiceImpl) FindAll(ctx context.Context) []response.MentionRespons
 }
 
 // FindById implements BookService
-func (b *BookServiceImpl) FindById(ctx context.Context, bookId int) response.MentionResponse {
-	book, err := b.BookRepository.FindById(ctx, bookId)
+func (b *MentionsServiceImpl) FindById(ctx context.Context, mentionId string) response.MentionResponse {
+	book, err := b.MentionRepository.FindById(ctx, mentionId)
 	helper.PanicIfError(err)
 	return response.MentionResponse(book)
-}
-
-// Update implements BookService
-func (b *BookServiceImpl) Update(ctx context.Context, request request.MentionCreateRequest) {
-	mention, err := b.BookRepository.FindById(ctx, request.ID)
-	helper.PanicIfError(err)
-
-	mention.Tweet = request.Tweet
-	b.BookRepository.Update(ctx, mention)
 }
