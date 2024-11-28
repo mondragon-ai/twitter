@@ -10,18 +10,23 @@ import (
 	"github.com/twitter/controller"
 )
 
-func MentionsRouter(bookController *controller.MentionsController) *httprouter.Router {
+func MentionsRouter(mentionController *controller.MentionsController, twitterController *controller.TwitterController) *httprouter.Router {
 	router := httprouter.New()
 
 	router.GET("/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		fmt.Fprint(w, "Welcome Home")
 	})
 
-	router.GET("/api/mentions", bookController.FindAll)
-	router.GET("/api/mentions/:mentionId", bookController.FindById)
-	router.POST("/api/mentions", bookController.Create)
+	router.GET("/api/mentions", mentionController.FindAll)
+	router.GET("/api/mentions/:mentionId", mentionController.FindById)
+	router.POST("/api/mentions", mentionController.Create)
+	router.DELETE("/api/mentions/:mentionId", mentionController.Delete)
 
-	router.DELETE("/api/mentions/:mentionId", bookController.Delete)
+
+	router.POST("/api/twitter/tweet", twitterController.PostTweet)
+	router.GET("/api/twitter/mentions", twitterController.FetchMentions)
+	router.POST("/api/twitter/:mendionId", twitterController.ReplyMention)
+	router.POST("/api/twitter/:id", twitterController.ReplyDM)
 
 	return router
 }

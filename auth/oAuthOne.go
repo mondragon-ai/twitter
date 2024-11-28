@@ -12,6 +12,10 @@ import (
 	"time"
 )
 
+type TwitterAuth interface {
+    PrepareOAuthSignature(oauthConsumerKey, oauthToken, consumerSecret, tokenSecret string) string
+}
+
 
 func PrepareOAuthSignature(oauthConsumerKey, oauthToken, consumerSecret, tokenSecret string) string {
     // Constants

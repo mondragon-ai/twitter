@@ -38,16 +38,18 @@ func main() {
 	}
 
 	// repository
-	mentionepository := mentions.MentionCrud(db)
+	mentionRepository := mentions.MentionCrud(db)
 
 	// service
-	mentionService := service.NewMentionServiceImpl(mentionepository)
+	mentionService := service.NewMentionServiceImpl(mentionRepository)
+	twitterService := service.NewTwitterServiceImpl(mentionRepository)
 
-	// controller
+	// Controllers
 	mentionsController := controller.NewMentionsController(mentionService)
+	twitterController := controller.NewTwitterController(twitterService)
 
 	// router
-	routes := router.MentionsRouter(mentionsController)
+	routes := router.MentionsRouter(mentionsController, twitterController)
 
     port := os.Getenv("PORT")
     if port == "" {

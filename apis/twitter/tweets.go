@@ -22,7 +22,6 @@ var (
 	accessTokenSecret = os.Getenv("ACCESS_TOKEN_SECRET")
 )
 
-
 // List of topics
 var topics = []string{
 	"Stock Market's Musical Chairs",
@@ -254,8 +253,6 @@ func Tweet(writer http.ResponseWriter, request *http.Request) {
 	fmt.Println("Response Status:", resp.Status)
 }
 
-
-
 func Post() {
 
 	// Retrieve environment variables
@@ -300,8 +297,6 @@ func Post() {
 	// Print response
 	fmt.Println("Response Status:", resp.Status)
 }
-
-
 
 func filterWordsWithHash(input string) string {
 	// Split the input string by whitespace
