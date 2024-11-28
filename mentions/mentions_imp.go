@@ -29,12 +29,12 @@ func (b *MentionRepositoryImpl) Delete(ctx context.Context, mentionId string) {
 }
 
 // FindAll implements MentionsRepository
-func (b *MentionRepositoryImpl) FindAll(ctx context.Context) []model.Mention {
+func (b *MentionRepositoryImpl) FindAll(ctx context.Context) ([]model.Mention, error) {
 	tx, err := b.Db.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
 
-	SQL := "select id,name from mention"
+	SQL := "SELECT id, content, author, created FROM mention"
 	result, errQuery := tx.QueryContext(ctx, SQL)
 	helper.PanicIfError(errQuery)
 	defer result.Close()
@@ -43,13 +43,13 @@ func (b *MentionRepositoryImpl) FindAll(ctx context.Context) []model.Mention {
 
 	for result.Next() {
 		mention := model.Mention{}
-		err := result.Scan(&mention.ID, &mention.ID)
+		err := result.Scan(&mention.ID, &mention.Content, &mention.Author, &mention.Created)
 		helper.PanicIfError(err)
 
 		mentions = append(mentions, mention)
 	}
 
-	return mentions
+	return mentions, nil
 }
 
 // FindById implements MentionsRepository
@@ -58,7 +58,7 @@ func (b *MentionRepositoryImpl) FindById(ctx context.Context, mentionId string) 
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
 
-	SQL := "select id,name from mention where id=$1"
+	SQL := "SELECT id, content, author, created FROM mention where id=$1"
 	result, errQuery := tx.QueryContext(ctx, SQL, mentionId)
 	helper.PanicIfError(errQuery)
 	defer result.Close()
@@ -80,7 +80,10 @@ func (b *MentionRepositoryImpl) Save(ctx context.Context, mention model.Mention)
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
 
-	SQL := "insert into mention(name) values ($1)"
-	_, err = tx.ExecContext(ctx, SQL, mention.ID)
+	// SQL query for inserting into the `mentions` table
+	SQL := "INSERT INTO mentions (id, content, author, created) VALUES ($1, $2, $3, $4)"
+
+	// Execute the query with the mention data
+	_, err = tx.ExecContext(ctx, SQL, mention.ID, mention.Content, mention.Author, mention.Created)
 	helper.PanicIfError(err)
 }

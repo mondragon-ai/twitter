@@ -36,7 +36,8 @@ func (b *MentionsServiceImpl) Delete(ctx context.Context, mentionId string) {
 
 // FindAll implements BookService
 func (b *MentionsServiceImpl) FindAll(ctx context.Context) []response.MentionResponse {
-	books := b.MentionRepository.FindAll(ctx)
+	books, err := b.MentionRepository.FindAll(ctx)
+	helper.PanicIfError(err)
 
 	var bookResp []response.MentionResponse
 
