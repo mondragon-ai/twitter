@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -11,19 +12,19 @@ import (
 	"github.com/twitter/service"
 )
 
-type BookController struct {
-	BookService service.MentionService
+type MentionsController struct {
+	MentionService service.MentionService
 }
 
-func NewBookController(bookService service.MentionService) *BookController {
-	return &BookController{BookService: bookService}
+func NewMentionsController(mentionService service.MentionService) *MentionsController {
+	return &MentionsController{MentionService: mentionService}
 }
 
-func (controller *BookController) Create(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
-	bookCreateRequest := request.MentionCreateRequest{}
-	helper.ReadRequestBody(requests, &bookCreateRequest)
+func (controller *MentionsController) Create(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
+	mentionCreateRequest := request.MentionCreateRequest{}
+	helper.ReadRequestBody(requests, &mentionCreateRequest)
 
-	controller.BookService.Create(requests.Context(), bookCreateRequest)
+	controller.MentionService.Create(requests.Context(), mentionCreateRequest)
 	webResponse := response.WebResponse{
 		Code:   200,
 		Status: "Ok",
@@ -33,11 +34,10 @@ func (controller *BookController) Create(writer http.ResponseWriter, requests *h
 	helper.WriteResponseBody(writer, webResponse)
 }
 
-
-func (controller *BookController) Delete(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
+func (controller *MentionsController) Delete(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
 	mentionId := params.ByName("mentionId")
 
-	controller.BookService.Delete(requests.Context(), mentionId)
+	controller.MentionService.Delete(requests.Context(), mentionId)
 	webResponse := response.WebResponse{
 		Code:   200,
 		Status: "Ok",
@@ -48,8 +48,8 @@ func (controller *BookController) Delete(writer http.ResponseWriter, requests *h
 
 }
 
-func (controller *BookController) FindAll(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
-	result := controller.BookService.FindAll(requests.Context())
+func (controller *MentionsController) FindAll(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
+	result := controller.MentionService.FindAll(requests.Context())
 	webResponse := response.WebResponse{
 		Code:   200,
 		Status: "Ok",
@@ -59,16 +59,20 @@ func (controller *BookController) FindAll(writer http.ResponseWriter, requests *
 	helper.WriteResponseBody(writer, webResponse)
 }
 
-func (controller *BookController) FindById(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
+func (controller *MentionsController) FindById(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
 	mentionId := params.ByName("mentionId")
 
-	result := controller.BookService.FindById(requests.Context(), mentionId)
-	webResponse := response.WebResponse{
-		Code:   200,
-		Status: "Ok",
-		Data:   result,
-	}
+	result, err := controller.MentionService.FindById(requests.Context(), mentionId)
+	if err != nil {
+        http.Error(writer, fmt.Sprintf("Error: %s", err.Error()), http.StatusNotFound)
+        return
+    }
+
+    webResponse := response.WebResponse{
+        Code:   http.StatusOK,
+        Status: "Ok",
+        Data:   result,
+    }
 
 	helper.WriteResponseBody(writer, webResponse)
-
 }

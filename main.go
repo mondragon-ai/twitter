@@ -30,17 +30,24 @@ func main() {
 	db, err := config.DatabaseConnection(connString)
 	helper.PanicIfError(err)
 
+
+	// Ensure the mention table exists
+	err = config.CreateDB(db)
+	if err != nil {
+		log.Fatal("Could not create table: ", err)
+	}
+
 	// repository
 	mentionepository := mentions.MentionCrud(db)
 
 	// service
-	bookService := service.NewMentionServiceImpl(mentionepository)
+	mentionService := service.NewMentionServiceImpl(mentionepository)
 
 	// controller
-	bookController := controller.NewBookController(bookService)
+	mentionsController := controller.NewMentionsController(mentionService)
 
 	// router
-	routes := router.NewRouter(bookController)
+	routes := router.MentionsRouter(mentionsController)
 
 	server := http.Server{Addr: "localhost:8888", Handler: routes}
 

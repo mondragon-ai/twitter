@@ -18,40 +18,49 @@ func NewMentionServiceImpl(MentionRepository mentions.MentionRepository) Mention
 	return &MentionsServiceImpl{MentionRepository: MentionRepository}
 }
 
-// Create implements BookService
+// Create implements MentionService
 func (b *MentionsServiceImpl) Create(ctx context.Context, request request.MentionCreateRequest) {
-	book := model.Mention{
+	mention := model.Mention{
 		ID: request.ID,
 		Content: request.Content,
+		Author:  request.Author,
+		Created: request.Created,
 	}
-	b.MentionRepository.Save(ctx, book)
+	b.MentionRepository.Save(ctx, mention)
 }
 
-// Delete implements BookService
+// Delete implements MentionService
 func (b *MentionsServiceImpl) Delete(ctx context.Context, mentionId string) {
 	mention, err := b.MentionRepository.FindById(ctx, mentionId)
 	helper.PanicIfError(err)
 	b.MentionRepository.Delete(ctx, mention.ID)
 }
 
-// FindAll implements BookService
+// FindAll implements MentionService
 func (b *MentionsServiceImpl) FindAll(ctx context.Context) []response.MentionResponse {
-	books, err := b.MentionRepository.FindAll(ctx)
+	mentions, err := b.MentionRepository.FindAll(ctx)
 	helper.PanicIfError(err)
 
-	var bookResp []response.MentionResponse
+	var mentionsResp []response.MentionResponse
 
-	for _, value := range books {
-		book := response.MentionResponse{ID: value.ID, Content: value.Content}
-		bookResp = append(bookResp, book)
+	for _, value := range mentions {
+		mention := response.MentionResponse{ID: value.ID, Content: value.Content}
+		mentionsResp = append(mentionsResp, mention)
 	}
-	return bookResp
-
+	return mentionsResp
 }
 
-// FindById implements BookService
-func (b *MentionsServiceImpl) FindById(ctx context.Context, mentionId string) response.MentionResponse {
-	book, err := b.MentionRepository.FindById(ctx, mentionId)
-	helper.PanicIfError(err)
-	return response.MentionResponse(book)
+// FindById implements MentionService
+func (b *MentionsServiceImpl) FindById(ctx context.Context, mentionId string) (*response.MentionResponse, error) {
+	mention, err := b.MentionRepository.FindById(ctx, mentionId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &response.MentionResponse{
+        ID:   mention.ID,
+		Content: mention.Content,
+		Author: mention.Author,
+		Created: mention.Created,
+    }, nil
 }

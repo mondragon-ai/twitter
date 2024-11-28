@@ -1,7 +1,6 @@
-
-CREATE TABLE public.mention (
-    id VARCHAR(255) PRIMARY KEY,
+CREATE TABLE mention (
+    id SERIAL PRIMARY KEY,
     content TEXT NOT NULL,
-    author VARCHAR(255) NOT NULL, 
+    author VARCHAR(255),
     created TEXT NOT NULL
 );

@@ -3,7 +3,7 @@ package mentions
 import (
 	"context"
 	"database/sql"
-	"errors"
+	"fmt"
 
 	"github.com/twitter/helper"
 	"github.com/twitter/model"
@@ -53,7 +53,7 @@ func (b *MentionRepositoryImpl) FindAll(ctx context.Context) ([]model.Mention, e
 }
 
 // FindById implements MentionsRepository
-func (b *MentionRepositoryImpl) FindById(ctx context.Context, mentionId string) (model.Mention, error) {
+func (b *MentionRepositoryImpl) FindById(ctx context.Context, mentionId string) (*model.Mention, error) {
 	tx, err := b.Db.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
@@ -68,9 +68,10 @@ func (b *MentionRepositoryImpl) FindById(ctx context.Context, mentionId string) 
 	if result.Next() {
 		err := result.Scan(&mention.ID, &mention.ID)
 		helper.PanicIfError(err)
-		return mention, nil
+		return &mention, nil
 	} else {
-		return mention, errors.New("mention id not found")
+		return &mention, fmt.Errorf("mention with id %s not found", mentionId)
+
 	}
 }
 
@@ -81,7 +82,7 @@ func (b *MentionRepositoryImpl) Save(ctx context.Context, mention model.Mention)
 	defer helper.CommitOrRollback(tx)
 
 	// SQL query for inserting into the `mentions` table
-	SQL := "INSERT INTO mentions (id, content, author, created) VALUES ($1, $2, $3, $4)"
+	SQL := "INSERT INTO mention (id, content, author, created) VALUES ($1, $2, $3, $4)"
 
 	// Execute the query with the mention data
 	_, err = tx.ExecContext(ctx, SQL, mention.ID, mention.Content, mention.Author, mention.Created)

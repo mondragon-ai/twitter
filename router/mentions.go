@@ -10,18 +10,18 @@ import (
 	"github.com/twitter/controller"
 )
 
-func NewRouter(bookController *controller.BookController) *httprouter.Router {
+func MentionsRouter(bookController *controller.MentionsController) *httprouter.Router {
 	router := httprouter.New()
 
 	router.GET("/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		fmt.Fprint(w, "Welcome Home")
 	})
 
-	router.GET("/api/book", bookController.FindAll)
-	router.GET("/api/book/:bookId", bookController.FindById)
-	router.POST("/api/book", bookController.Create)
+	router.GET("/api/mentions", bookController.FindAll)
+	router.GET("/api/mentions/:mentionId", bookController.FindById)
+	router.POST("/api/mentions", bookController.Create)
 
-	router.DELETE("/api/book/:bookId", bookController.Delete)
+	router.DELETE("/api/mentions/:mentionId", bookController.Delete)
 
 	return router
 }
