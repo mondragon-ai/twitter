@@ -15,8 +15,5 @@ COPY . .
 # Build the application
 RUN go build -o ./out/dist .
 
-# Build the application
-RUN go build -o ./out/dist .
-
 # Command to run the executable
 CMD ["./out/dist"]

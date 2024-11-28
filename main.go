@@ -49,10 +49,16 @@ func main() {
 	// router
 	routes := router.MentionsRouter(mentionsController)
 
-	server := http.Server{Addr: "localhost:8888", Handler: routes}
+    port := os.Getenv("PORT")
+    if port == "" {
+        port = "8080"
+    }
 
-	err = server.ListenAndServe()
-	helper.PanicIfError(err)
+    server := http.Server{Addr: ":" + port, Handler: routes}
+
+    log.Printf("Starting server on port %s\n", port)
+    err = server.ListenAndServe()
+    helper.PanicIfError(err)
 
 }
 
