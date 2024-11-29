@@ -39,15 +39,22 @@ func (c *TwitterController) PostTweet(writer http.ResponseWriter, requests *http
 
 func (c *TwitterController) FetchMentions(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
 
-	// c.TwitterService.FetchMentions(requests.Context())
+	fmt.Println("Fetching...")
+	// Call the Twitter service to fetch mentions
+	mentions, err := c.TwitterService.FetchMentions(requests.Context())
+	if err != nil {
+		http.Error(writer, fmt.Sprintf("Failed to fetch mentions: %s", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with the mentions in JSON format
 	webResponse := response.WebResponse{
 		Code:   200,
 		Status: "Ok",
-		Data:   nil,
+		Data:   mentions,
 	}
-
+	
 	helper.WriteResponseBody(writer, webResponse)
-
 }
 
 func (c *TwitterController) ReplyMention(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
