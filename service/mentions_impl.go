@@ -26,19 +26,19 @@ func (b *MentionsServiceImpl) Create(ctx context.Context, request request.Mentio
 		Author:  request.Author,
 		Created: request.Created,
 	}
-	b.MentionRepository.Save(ctx, mention)
+	b.MentionRepository.SaveMention(ctx, mention)
 }
 
 // Delete implements MentionService
 func (b *MentionsServiceImpl) Delete(ctx context.Context, mentionId string) {
-	mention, err := b.MentionRepository.FindById(ctx, mentionId)
+	mention, err := b.MentionRepository.FindMentionById(ctx, mentionId)
 	helper.PanicIfError(err)
-	b.MentionRepository.Delete(ctx, mention.ID)
+	b.MentionRepository.DeleteMention(ctx, mention.ID)
 }
 
 // FindAll implements MentionService
 func (b *MentionsServiceImpl) FindAll(ctx context.Context) []response.MentionResponse {
-	mentions, err := b.MentionRepository.FindAll(ctx)
+	mentions, err := b.MentionRepository.FindAllMentions(ctx)
 	helper.PanicIfError(err)
 
 	var mentionsResp []response.MentionResponse
@@ -52,7 +52,7 @@ func (b *MentionsServiceImpl) FindAll(ctx context.Context) []response.MentionRes
 
 // FindById implements MentionService
 func (b *MentionsServiceImpl) FindById(ctx context.Context, mentionId string) (*response.MentionResponse, error) {
-	mention, err := b.MentionRepository.FindById(ctx, mentionId)
+	mention, err := b.MentionRepository.FindMentionById(ctx, mentionId)
 	if err != nil {
 		return nil, err
 	}

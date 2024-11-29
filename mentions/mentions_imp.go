@@ -18,7 +18,7 @@ func MentionCrud(Db *sql.DB) MentionRepository {
 }
 
 // Delete implements MentionsRepository
-func (b *MentionRepositoryImpl) Delete(ctx context.Context, mentionId string) {
+func (b *MentionRepositoryImpl) DeleteMention(ctx context.Context, mentionId string) {
 	tx, err := b.Db.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
@@ -29,7 +29,7 @@ func (b *MentionRepositoryImpl) Delete(ctx context.Context, mentionId string) {
 }
 
 // FindAll implements MentionsRepository
-func (b *MentionRepositoryImpl) FindAll(ctx context.Context) ([]model.Mention, error) {
+func (b *MentionRepositoryImpl) FindAllMentions(ctx context.Context) ([]model.Mention, error) {
 	tx, err := b.Db.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
@@ -53,7 +53,7 @@ func (b *MentionRepositoryImpl) FindAll(ctx context.Context) ([]model.Mention, e
 }
 
 // FindById implements MentionsRepository
-func (b *MentionRepositoryImpl) FindById(ctx context.Context, mentionId string) (*model.Mention, error) {
+func (b *MentionRepositoryImpl) FindMentionById(ctx context.Context, mentionId string) (*model.Mention, error) {
 	tx, err := b.Db.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
@@ -76,7 +76,7 @@ func (b *MentionRepositoryImpl) FindById(ctx context.Context, mentionId string) 
 }
 
 // Save implements MentionsRepository
-func (b *MentionRepositoryImpl) Save(ctx context.Context, mention model.Mention) {
+func (b *MentionRepositoryImpl) SaveMention(ctx context.Context, mention model.Mention) {
 	tx, err := b.Db.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)

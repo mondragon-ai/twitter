@@ -7,8 +7,8 @@ import (
 )
 
 type MentionRepository interface {
-	Save(ctx context.Context, mention model.Mention)
-	Delete(ctx context.Context, mentiondID string)
-	FindById(ctx context.Context, mentiondID string) (*model.Mention, error)
-	FindAll(ctx context.Context) ([]model.Mention, error)
+	SaveMention(ctx context.Context, mention model.Mention)
+	DeleteMention(ctx context.Context, mentiondID string)
+	FindMentionById(ctx context.Context, mentiondID string) (*model.Mention, error)
+	FindAllMentions(ctx context.Context) ([]model.Mention, error)
 }
