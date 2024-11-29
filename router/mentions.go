@@ -25,8 +25,8 @@ func MentionsRouter(mentionController *controller.MentionsController, twitterCon
 
 	router.POST("/api/twitter/tweet", twitterController.PostTweet)
 	router.GET("/api/twitter/mentions", twitterController.FetchMentions)
-	router.POST("/api/twitter/:mendionId", twitterController.ReplyMention)
-	router.POST("/api/twitter/:id", twitterController.ReplyDM)
+	router.POST("/api/twitter/mention/:mendionId", twitterController.ReplyMention)
+	router.POST("/api/twitter/direct/:id", twitterController.ReplyDM)
 
 	return router
 }

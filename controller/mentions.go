@@ -45,7 +45,6 @@ func (controller *MentionsController) Delete(writer http.ResponseWriter, request
 	}
 
 	helper.WriteResponseBody(writer, webResponse)
-
 }
 
 func (controller *MentionsController) FindAll(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
