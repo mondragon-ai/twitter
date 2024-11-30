@@ -3,6 +3,7 @@ package config
 import (
 	"database/sql"
 	"fmt"
+	"log"
 
 	_ "github.com/lib/pq"
 )
@@ -21,15 +22,47 @@ func DatabaseConnection(connString string) (*sql.DB, error) {
 	return db, nil
 }
 
+// RecreateDB deletes the mention table if it exists, then creates a new one
+func ResetDB(db *sql.DB) error {
+	// Drop the mention table if it exists
+	_, err := db.Exec(`DROP TABLE IF EXISTS mention;`)
+	if err != nil {
+		return fmt.Errorf("error deleting mention table: %v", err)
+	}
+	log.Println("mention table deleted successfully.")
+
+	// Create a new mention table
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS mention (
+			id SERIAL PRIMARY KEY,
+			parent_id TEXT,               	-- Conversation ID (Parent Tweet ID)
+			author_id TEXT NOT NULL,      	-- Author ID
+			tweet_id TEXT NOT NULL UNIQUE, 	-- Tweet ID (Unique identifier for the tweet)
+			content TEXT NOT NULL,        	-- Tweet content
+			author_name TEXT NOT NULL,    	-- Author's name
+			created_at TEXT NOT NULL 		-- Timestamp for when the mention was recorded
+		);
+	`)
+	if err != nil {
+		return fmt.Errorf("error creating mention table: %v", err)
+	}
+	log.Println("mention table created successfully.")
+	return nil
+}
+
 // CreateDB ensures the mention table exists in the database
 func CreateDB(db *sql.DB) error {
 	_, err := db.Exec(`
 		CREATE TABLE IF NOT EXISTS mention (
 			id SERIAL PRIMARY KEY,
-			content TEXT NOT NULL,
-			author TEXT NOT NULL,
-			created TEXT NOT NULL
-		);`)
+			parent_id TEXT,               	-- Conversation ID (Parent Tweet ID)
+			author_id TEXT NOT NULL,      	-- Author ID
+			tweet_id TEXT NOT NULL UNIQUE, 	-- Tweet ID (Unique identifier for the tweet)
+			content TEXT NOT NULL,        	-- Tweet content
+			author_name TEXT NOT NULL,    	-- Author's name
+			created_at TEXT NOT NULL 		-- Timestamp for when the mention was recorded
+		);
+	`)
 	if err != nil {
 		return fmt.Errorf("error creating mention table: %v", err)
 	}

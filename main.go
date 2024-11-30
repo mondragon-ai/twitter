@@ -30,7 +30,6 @@ func main() {
 	db, err := config.DatabaseConnection(connString)
 	helper.PanicIfError(err)
 
-
 	// Ensure the mention table exists
 	err = config.CreateDB(db)
 	if err != nil {

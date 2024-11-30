@@ -21,10 +21,11 @@ func NewMentionServiceImpl(MentionRepository mentions.MentionRepository) Mention
 // Create implements MentionService
 func (b *MentionsServiceImpl) Create(ctx context.Context, request request.MentionCreateRequest) {
 	mention := model.Mention{
-		ID: request.ID,
+		ParentID: request.ParentID,
+		AuthorID:  request.AuthorID,
+		TweetID:  request.TweetID,
+		AuthorName:  request.AuthorName,
 		Content: request.Content,
-		Author:  request.Author,
-		Created: request.Created,
 	}
 	b.MentionRepository.SaveMention(ctx, mention)
 }
@@ -33,7 +34,7 @@ func (b *MentionsServiceImpl) Create(ctx context.Context, request request.Mentio
 func (b *MentionsServiceImpl) Delete(ctx context.Context, mentionId string) {
 	mention, err := b.MentionRepository.FindMentionById(ctx, mentionId)
 	helper.PanicIfError(err)
-	b.MentionRepository.DeleteMention(ctx, mention.ID)
+	b.MentionRepository.DeleteMention(ctx, mention.TweetID)
 }
 
 // FindAll implements MentionService
@@ -44,7 +45,13 @@ func (b *MentionsServiceImpl) FindAll(ctx context.Context) []response.MentionRes
 	var mentionsResp []response.MentionResponse
 
 	for _, value := range mentions {
-		mention := response.MentionResponse{ID: value.ID, Content: value.Content}
+		mention := response.MentionResponse{
+			ParentID: value.ParentID,
+			AuthorID:  value.AuthorID,
+			TweetID:  value.TweetID,
+			AuthorName:  value.AuthorName,
+			Content: value.Content,
+		}
 		mentionsResp = append(mentionsResp, mention)
 	}
 	return mentionsResp
@@ -58,9 +65,10 @@ func (b *MentionsServiceImpl) FindById(ctx context.Context, mentionId string) (*
 	}
 
 	return &response.MentionResponse{
-        ID:   mention.ID,
+		ParentID: mention.ParentID,
+		AuthorID:  mention.AuthorID,
+		TweetID:  mention.TweetID,
+		AuthorName:  mention.AuthorName,
 		Content: mention.Content,
-		Author: mention.Author,
-		Created: mention.Created,
     }, nil
 }

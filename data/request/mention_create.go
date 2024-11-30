@@ -1,8 +1,9 @@
 package request
 
 type MentionCreateRequest struct {
-	ID      string `json:"id"`
-	Content string `json:"content"`
-	Author  string `json:"author"`
-	Created string `json:"created"` // Adjust the type if needed
+	ParentID	string			`json:"conversation_id"`
+	AuthorID	string      	`json:"author_id"`
+	TweetID		string      	`json:"id"`
+	Content		string      	`json:"text"`
+	AuthorName	string      	`json:"author_name"`
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/twitter/auth"
 	"github.com/twitter/data/request"
 	"github.com/twitter/mentions"
+	"github.com/twitter/model"
 )
 
 
@@ -106,7 +107,7 @@ func (t *TwitterServiceImpl) MakeTwitterRequest(ctx context.Context, method, url
     return resp, nil
 }
 
-func (t *TwitterServiceImpl) GetTwitterRequest(ctx context.Context, url string, body interface{}) (*http.Response, error) {
+func (t *TwitterServiceImpl) GetTwitterRequest(ctx context.Context, url string, body interface{}) ([]byte, error) {
 	bearer := os.Getenv("ANGEL_BEARER")
 	token := fmt.Sprintf("Bearer %s", bearer)
 
@@ -121,31 +122,6 @@ func (t *TwitterServiceImpl) GetTwitterRequest(ctx context.Context, url string, 
     if err != nil {
         log.Fatal(err)
     }
-    defer resp.Body.Close()
-
-    fmt.Println("Status:", resp.Status)
-
-    data, err := io.ReadAll(resp.Body)
-    if err != nil {
-        log.Fatal(err)
-    }
-    fmt.Println(string(data))
-    return resp, nil
-}
-
-func (t *TwitterServiceImpl) FetchMentions(ctx context.Context) ([]string, error) {
-	// now := time.Now().UTC()
-	// startTime := now.Add(-time.Duration(60*24*7) * time.Minute).Format(time.RFC3339)
-
-	// Twitter API endpoint for mentions timeline
-	user_id :=  "771833622286503936"
-	url := fmt.Sprintf("https://api.x.com/2/users/%s/mentions", user_id)
-
-    resp, err := t.GetTwitterRequest(ctx, url, nil)
-    if err != nil {
-        log.Printf("Failed to make Twitter request: %v", err)
-        return nil, fmt.Errorf("failed to fetch mentions: %w", err)
-    }
 
     if resp == nil || resp.Body == nil {
         log.Fatal("Received nil response or response body from Twitter API")
@@ -157,25 +133,52 @@ func (t *TwitterServiceImpl) FetchMentions(ctx context.Context) ([]string, error
         return nil, fmt.Errorf("twitter API error: %d", resp.StatusCode)
     }
 
-    var twitterResponse struct {
-        Data []struct {
-            Text string `json:"text"`
-            ID   string `json:"id"`
-        } `json:"data"`
-    }
-
-    err = json.NewDecoder(resp.Body).Decode(&twitterResponse)
+    data, err := io.ReadAll(resp.Body)
+    defer resp.Body.Close()
     if err != nil {
-        log.Printf("Failed to decode Twitter response: %v", err)
-        return nil, fmt.Errorf("failed to parse mentions response: %w", err)
+        log.Fatal(err)
     }
 
+    return data, nil
+}
 
-	// Extract mentions from the tweet text
-	var mentions []string
+func (t *TwitterServiceImpl) FetchMentions(ctx context.Context) ([]model.Mention, error)  {
+	// now := time.Now().UTC()
+	// startTime := now.Add(-time.Duration(60*24*7) * time.Minute).Format(time.RFC3339)
+
+	// Twitter API endpoint for mentions timeline
+	user_id :=  "771833622286503936"
+	url := fmt.Sprintf("https://api.x.com/2/users/%s/mentions?expansions=attachments.poll_ids,attachments.media_keys,author_id,geo.place_id,in_reply_to_user_id,referenced_tweets.id,entities.mentions.username,referenced_tweets.id.author_id,edit_history_tweet_ids&tweet.fields=created_at,author_id,text,attachments,conversation_id,referenced_tweets", user_id)
+
+    data, err := t.GetTwitterRequest(ctx, url, nil)
+    if err != nil {
+        log.Printf("Failed to make Twitter request: %v", err)
+        return nil, fmt.Errorf("failed to fetch mentions: %w", err)
+    }
+
+	twitterResponse := &request.RootTweetMentions{}
+	err = json.Unmarshal(data, twitterResponse)
+	if err != nil {
+		log.Printf("Failed to decode Twitter response: %v", err)
+		return nil, fmt.Errorf("failed to parse mentions response: %w", err)
+	}
+
+	mentions := []model.Mention{}
 	for _, tweet := range twitterResponse.Data {
-		extracted := extractMentions(tweet.Text)
-		mentions = append(mentions, extracted...)
+		if tweet.ConversationID == tweet.ID {
+			mentions = append(mentions, model.Mention{
+				ParentID: tweet.ConversationID,
+				AuthorID: tweet.AuthorID,
+				TweetID: tweet.ID,
+				Content: tweet.Text,
+				AuthorName: "",
+				CreatedAt: tweet.CreatedAt,
+			})
+		} else {
+			for _, t := range twitterResponse.Includes.Tweets {
+				fmt.Printf("ID: %v, Tweet: %s", t.ID, t.Text)
+			}
+		}
 	}
 
 	// Return the mentions or an empty array
@@ -238,17 +241,17 @@ func (t *TwitterServiceImpl) PostTweet(ctx context.Context, request request.Twee
 	return nil, fmt.Errorf("failed to post tweet: %v", "TEST")
 }
 
-// Helper function to extract mentions from tweet text
-func extractMentions(tweetText string) []string {
-	var mentions []string
-	words := strings.Split(tweetText, " ")
-	for _, word := range words {
-		if strings.HasPrefix(word, "@") {
-			mentions = append(mentions, word)
-		}
-	}
-	return mentions
-}
+// // Helper function to extract mentions from tweet text
+// func extractMentions(tweetText string) []string {
+// 	var mentions []string
+// 	words := strings.Split(tweetText, " ")
+// 	for _, word := range words {
+// 		if strings.HasPrefix(word, "@") {
+// 			mentions = append(mentions, word)
+// 		}
+// 	}
+// 	return mentions
+// }
 
 func (t *TwitterServiceImpl) ReplyMention(ctx context.Context, mentionId string) {
 }

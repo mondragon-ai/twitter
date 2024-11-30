@@ -38,8 +38,6 @@ func (c *TwitterController) PostTweet(writer http.ResponseWriter, requests *http
 }
 
 func (c *TwitterController) FetchMentions(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
-
-	fmt.Println("Fetching...")
 	// Call the Twitter service to fetch mentions
 	mentions, err := c.TwitterService.FetchMentions(requests.Context())
 	if err != nil {
