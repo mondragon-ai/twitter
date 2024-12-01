@@ -143,7 +143,7 @@ func (t *TwitterServiceImpl) GetTwitterRequest(ctx context.Context, url string, 
 }
 
 func (t *TwitterServiceImpl) FetchMentions(ctx context.Context) ([]model.Mention, error)  {
-	// now := time.Now().UTC()
+	// now := time.Now()
 	// startTime := now.Add(-time.Duration(60*24*7) * time.Minute).Format(time.RFC3339)
 
 	// Twitter API endpoint for mentions timeline
@@ -166,17 +166,36 @@ func (t *TwitterServiceImpl) FetchMentions(ctx context.Context) ([]model.Mention
 	mentions := []model.Mention{}
 	for _, tweet := range twitterResponse.Data {
 		if tweet.ConversationID == tweet.ID {
-			mentions = append(mentions, model.Mention{
-				ParentID: tweet.ConversationID,
-				AuthorID: tweet.AuthorID,
-				TweetID: tweet.ID,
-				Content: tweet.Text,
-				AuthorName: "",
-				CreatedAt: tweet.CreatedAt,
-			})
+			for _, u := range twitterResponse.Includes.Users {
+				if u.ID == tweet.AuthorID {
+					mentions = append(mentions, model.Mention{
+						ParentID: tweet.ConversationID,
+						AuthorID: tweet.AuthorID,
+						TweetID: tweet.ID,
+						Content: tweet.Text,
+						AuthorName: u.Name,
+						ParentContent: "",
+						CreatedAt: tweet.CreatedAt,
+					})
+				}
+			}
 		} else {
 			for _, t := range twitterResponse.Includes.Tweets {
-				fmt.Printf("ID: %v, Tweet: %s", t.ID, t.Text)
+				if t.ID == tweet.ConversationID {
+					for _, u := range twitterResponse.Includes.Users {
+						if u.ID == tweet.AuthorID {
+							mentions = append(mentions, model.Mention{
+								ParentID: tweet.ConversationID,
+								AuthorID: tweet.AuthorID,
+								TweetID: tweet.ID,
+								Content: tweet.Text,
+								AuthorName: u.Name,
+								ParentContent: t.Text,
+								CreatedAt: tweet.CreatedAt,
+							})
+						}
+					}
+				}
 			}
 		}
 	}
