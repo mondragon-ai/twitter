@@ -18,7 +18,7 @@ func MentionCrud(Db *sql.DB) MentionRepository {
 }
 
 // Delete implements MentionsRepository
-func (b *MentionRepositoryImpl) DeleteMention(ctx context.Context, mentionId string) {
+func (b *MentionRepositoryImpl) DeleteMention(ctx context.Context, mentionId int) {
 	tx, err := b.Db.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
@@ -72,7 +72,7 @@ func (b *MentionRepositoryImpl) SaveMention(ctx context.Context, mention model.M
 }
 
 // FindById implements MentionsRepository
-func (b *MentionRepositoryImpl) FindMentionById(ctx context.Context, mentionId string) (*model.Mention, error) {
+func (b *MentionRepositoryImpl) FindMentionById(ctx context.Context, mentionId int) (*model.Mention, error) {
 	tx, err := b.Db.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
@@ -89,7 +89,7 @@ func (b *MentionRepositoryImpl) FindMentionById(ctx context.Context, mentionId s
 		helper.PanicIfError(err)
 		return &mention, nil
 	} else {
-		return &mention, fmt.Errorf("mention with id %s not found", mentionId)
+		return &mention, fmt.Errorf("mention with id %q not found", mentionId)
 
 	}
 }
@@ -97,7 +97,7 @@ func (b *MentionRepositoryImpl) FindMentionById(ctx context.Context, mentionId s
 
 
 // Delete Tweet Idea
-func (b *MentionRepositoryImpl) DeleteTweetIdea(ctx context.Context, ideaID string) {
+func (b *MentionRepositoryImpl) DeleteTweetIdea(ctx context.Context, ideaID int) {
 	tx, err := b.Db.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
@@ -139,7 +139,7 @@ func (b *MentionRepositoryImpl) SaveTweetIdea(ctx context.Context, idea model.Tw
 
 	SQL :=  `
 		INSERT INTO ideas (idea, used_count)
-		VALUES ($1, $2,)
+		VALUES ($1, $2)
 		ON CONFLICT (id) DO NOTHING;
 	`
 
@@ -152,7 +152,7 @@ func (b *MentionRepositoryImpl) SaveTweetIdea(ctx context.Context, idea model.Tw
 
 
 // Delete Tweet Thread Idea
-func (b *MentionRepositoryImpl) DeleteThreadIdea(ctx context.Context, ideaID string) {
+func (b *MentionRepositoryImpl) DeleteThreadIdea(ctx context.Context, ideaID int) {
 	tx, err := b.Db.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
@@ -207,7 +207,7 @@ func (b *MentionRepositoryImpl) SaveThreadIdea(ctx context.Context, thread model
 
 
 // Delete Tweet clone Idea
-func (b *MentionRepositoryImpl) DeleteTweetClone(ctx context.Context, ideaID string) {
+func (b *MentionRepositoryImpl) DeleteTweetClone(ctx context.Context, ideaID int) {
 	tx, err := b.Db.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
@@ -262,7 +262,7 @@ func (b *MentionRepositoryImpl) SaveTweetClone(ctx context.Context, clone model.
 
 
 // Delete Tweet Article url
-func (b *MentionRepositoryImpl) DeleteArticleUrl(ctx context.Context, articleID string) {
+func (b *MentionRepositoryImpl) DeleteArticleUrl(ctx context.Context, articleID int) {
 	tx, err := b.Db.Begin()
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)

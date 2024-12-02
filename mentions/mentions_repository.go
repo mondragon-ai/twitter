@@ -8,23 +8,23 @@ import (
 
 type MentionRepository interface {
 	SaveMention(ctx context.Context, mention model.Mention)
-	DeleteMention(ctx context.Context, mentiondID string)
-	FindMentionById(ctx context.Context, mentiondID string) (*model.Mention, error)
+	DeleteMention(ctx context.Context, mentiondID int)
+	FindMentionById(ctx context.Context, mentiondID int) (*model.Mention, error)
 	FindAllMentions(ctx context.Context) ([]model.Mention, error)
 
 	SaveTweetIdea(ctx context.Context, ideas model.TweetIdea)
-	DeleteTweetIdea(ctx context.Context, ideaID string)
+	DeleteTweetIdea(ctx context.Context, ideaID int)
 	FindAllTweetIdeas(ctx context.Context) ([]model.TweetIdea, error)
 
 	SaveThreadIdea(ctx context.Context, thread model.ThreadIdea)
-	DeleteThreadIdea(ctx context.Context, threadID string)
+	DeleteThreadIdea(ctx context.Context, threadID int)
 	FindAllThreadIdeas(ctx context.Context) ([]model.ThreadIdea, error)
 
 	SaveTweetClone(ctx context.Context, clone model.TweetClone)
-	DeleteTweetClone(ctx context.Context, cloneID string)
+	DeleteTweetClone(ctx context.Context, cloneID int)
 	FindAllTweetClones(ctx context.Context) ([]model.TweetClone, error)
 
 	SaveArticleUrl(ctx context.Context, article model.ArticleUrl)
-	DeleteArticleUrl(ctx context.Context, articleID string)
+	DeleteArticleUrl(ctx context.Context, articleID int)
 	FindAllArticleUrls(ctx context.Context) ([]model.ArticleUrl, error)
 }

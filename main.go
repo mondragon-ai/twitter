@@ -16,6 +16,23 @@ import (
 	"github.com/twitter/service"
 )
 
+// Middleware to enable CORS
+func enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*") // Allow all origins
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		// Handle preflight requests
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 
 	godotenv.Load(".env")
@@ -59,7 +76,10 @@ func main() {
         port = "8080"
     }
 
-    server := http.Server{Addr: ":" + port, Handler: routes}
+    server := http.Server{
+		Addr: ":" + port, 
+		Handler: enableCORS(routes),
+	}
 
     log.Printf("Starting server on port %s\n", port)
     err = server.ListenAndServe()

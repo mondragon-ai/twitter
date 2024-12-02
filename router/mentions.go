@@ -25,22 +25,22 @@ func MentionsRouter(mentionController *controller.MentionsController, twitterCon
 	// Tweet Clones
 	router.GET("/api/clones", mentionController.FindAllTweetClones)
 	router.POST("/api/clone", mentionController.CreateTweetClone)
-	router.DELETE("/api/clone/:mentionId", mentionController.DeleteTweetClone)
+	router.DELETE("/api/clone/:cloneID", mentionController.DeleteTweetClone)
 
 	// Tweet Ideas
 	router.GET("/api/ideas", mentionController.FindAllTweetIdeas)
 	router.POST("/api/ideas", mentionController.CreateTweetIdea)
-	router.DELETE("/api/ideas/:mentionId", mentionController.DeleteThreadIdea)
+	router.DELETE("/api/ideas/:ideaID", mentionController.DeleteTweetIdea)
 
 	// Tweet Thread Ideas
 	router.GET("/api/threads", mentionController.FindAllThreadIdeas)
 	router.POST("/api/threads", mentionController.CreateThreadIdea)
-	router.DELETE("/api/threads/:mentionId", mentionController.DeleteThreadIdea)
+	router.DELETE("/api/threads/:ideaID", mentionController.DeleteThreadIdea)
 
 	// Tweet Articles
 	router.GET("/api/articles", mentionController.FindAllArticleUrls)
 	router.POST("/api/articles", mentionController.CreateArticleUrl)
-	router.DELETE("/api/articles/:mentionId", mentionController.DeleteArticleUrl)
+	router.DELETE("/api/articles/:articleID", mentionController.DeleteArticleUrl)
 
 	// Tweet Actions
 	router.POST("/api/twitter/tweet", twitterController.PostTweet)

@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/julienschmidt/httprouter"
 
@@ -36,8 +37,18 @@ func (controller *MentionsController) Create(writer http.ResponseWriter, request
 
 func (controller *MentionsController) Delete(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
 	mentionId := params.ByName("mentionId")
+    if mentionId == "" {
+        http.Error(writer, "mentionId cannot be empty", http.StatusBadRequest)
+        return
+    }
 
-	controller.MentionService.Delete(requests.Context(), mentionId)
+    id, err := strconv.Atoi(mentionId)
+    if err != nil {
+        http.Error(writer, "Invalid mentionId format", http.StatusBadRequest)
+        return
+    }
+
+	controller.MentionService.Delete(requests.Context(), id)
 	webResponse := response.WebResponse{
 		Code:   200,
 		Status: "Ok",
@@ -60,8 +71,18 @@ func (controller *MentionsController) FindAll(writer http.ResponseWriter, reques
 
 func (controller *MentionsController) FindById(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
 	mentionId := params.ByName("mentionId")
+    if mentionId == "" {
+        http.Error(writer, "mentionId cannot be empty", http.StatusBadRequest)
+        return
+    }
 
-	result, err := controller.MentionService.FindById(requests.Context(), mentionId)
+    id, err := strconv.Atoi(mentionId)
+    if err != nil {
+        http.Error(writer, "Invalid mentionId format", http.StatusBadRequest)
+        return
+    }
+
+	result, err := controller.MentionService.FindById(requests.Context(), id)
 	if err != nil {
         http.Error(writer, fmt.Sprintf("Error: %s", err.Error()), http.StatusNotFound)
         return
@@ -98,8 +119,18 @@ func (controller *MentionsController) CreateTweetIdea(writer http.ResponseWriter
 // Delete Tweet Idea
 func (controller *MentionsController) DeleteTweetIdea(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
 	ideaID := params.ByName("ideaID")
+    if ideaID == "" {
+        http.Error(writer, "ideaID cannot be empty", http.StatusBadRequest)
+        return
+    }
 
-	controller.MentionService.DeleteTweetIdea(requests.Context(), ideaID)
+    id, err := strconv.Atoi(ideaID)
+    if err != nil {
+        http.Error(writer, "Invalid ideaID format", http.StatusBadRequest)
+        return
+    }
+
+	controller.MentionService.DeleteTweetIdea(requests.Context(), id)
 	webResponse := response.WebResponse{
 		Code:   200,
 		Status: "Ok",
@@ -145,8 +176,18 @@ func (controller *MentionsController) CreateThreadIdea(writer http.ResponseWrite
 // Delete Tweet Thread Idea
 func (controller *MentionsController) DeleteThreadIdea(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
 	ideaID := params.ByName("ideaID")
+    if ideaID == "" {
+        http.Error(writer, "ideaID cannot be empty", http.StatusBadRequest)
+        return
+    }
 
-	controller.MentionService.DeleteThreadIdea(requests.Context(), ideaID)
+    id, err := strconv.Atoi(ideaID)
+    if err != nil {
+        http.Error(writer, "Invalid ideaID format", http.StatusBadRequest)
+        return
+    }
+
+	controller.MentionService.DeleteThreadIdea(requests.Context(), id)
 	webResponse := response.WebResponse{
 		Code:   200,
 		Status: "Ok",
@@ -191,7 +232,18 @@ func (controller *MentionsController) CreateTweetClone(writer http.ResponseWrite
 func (controller *MentionsController) DeleteTweetClone(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
 	cloneID := params.ByName("cloneID")
 
-	controller.MentionService.DeleteTweetClone(requests.Context(), cloneID)
+    if cloneID == "" {
+        http.Error(writer, "cloneID cannot be empty", http.StatusBadRequest)
+        return
+    }
+
+    id, err := strconv.Atoi(cloneID)
+    if err != nil {
+        http.Error(writer, "Invalid cloneID format", http.StatusBadRequest)
+        return
+    }
+
+	controller.MentionService.DeleteTweetClone(requests.Context(), id)
 	webResponse := response.WebResponse{
 		Code:   200,
 		Status: "Ok",
@@ -236,7 +288,18 @@ func (controller *MentionsController) CreateArticleUrl(writer http.ResponseWrite
 func (controller *MentionsController) DeleteArticleUrl(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
 	articleID := params.ByName("articleID")
 
-	controller.MentionService.DeleteArticleUrl(requests.Context(), articleID)
+    if articleID == "" {
+        http.Error(writer, "articleID cannot be empty", http.StatusBadRequest)
+        return
+    }
+
+    id, err := strconv.Atoi(articleID)
+    if err != nil {
+        http.Error(writer, "Invalid articleID format", http.StatusBadRequest)
+        return
+    }
+
+	controller.MentionService.DeleteArticleUrl(requests.Context(), id)
 	webResponse := response.WebResponse{
 		Code:   200,
 		Status: "Ok",

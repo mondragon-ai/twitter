@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background: rgb(255, 255, 255);
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+      }
+      h2,
+      h6 {
+        position: relative;
+        line-height: 40px;
+        font-size: 30px;
+        font-family: "Courier New", Courier, monospace;
+        font-weight: 500;
+        color: rgb(33, 33, 33);
+      }
+      .ideasWrapper {
+        height: 80vh;
+        width: 100%;
+        max-height: 80vh;
+        margin: 0;
+        padding: 2rem 0;
+        position: relative;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: flex-start;
+      }
+
+      .ideasWrapper section {
+        height: 100%;
+        width: 24%;
+        margin: 0;
+        padding: 0rem;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        overflow-y: scroll;
+      }
+
+      .ideasWrapper section header {
+        height: auto;
+        width: 100%;
+        margin: 0;
+        padding: 0.5rem;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        box-sizing: border-box;
+      }
+      .inputWrapper {
+        height: auto;
+        width: 100%;
+        margin: 0;
+        padding: 0rem;
+        position: relative;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+      .inputWrapper input {
+        border-radius: 5px;
+        flex: 1;
+        margin-right: 10px;
+        padding: 5px 10px;
+        border: none;
+        border: 1px solid gray;
+      }
+      .inputWrapper button {
+        border-radius: 5px;
+        margin-right: 0px;
+        padding: 5px 10px;
+        border: none;
+        border: 1px solid gray;
+        cursor: pointer;
+        color: rgb(87, 87, 87);
+        background-color: rgb(125, 213, 87);
+      }
+      .inputWrapper button:hover {
+        box-shadow: 3px 5px black;
+      }
+      h6 {
+        position: relative;
+        line-height: 18px;
+        font-size: 15px;
+        font-family: "Courier New", Courier, monospace;
+        font-weight: 400;
+        color: rgb(33, 33, 33);
+        margin: 0px;
+        padding: 5px 5px;
+      }
+      ul,
+      li {
+        height: auto;
+        width: 100%;
+        margin: 0;
+        padding: 0.5rem;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        box-sizing: border-box;
+      }
+      ul li {
+        padding: 0.5rem;
+        background: rgb(220, 220, 220);
+        flex-direction: row;
+        justify-content: space-between;
+        border-radius: 6px;
+        margin-bottom: 10px;
+      }
+      ul li button {
+        border-radius: 5px;
+        margin-right: 0px;
+        padding: 5px 10px;
+        border: none;
+        border: 1px solid gray;
+        cursor: pointer;
+        color: rgb(87, 87, 87);
+        background-color: rgb(213, 87, 87);
+      }
+      span {
+        position: relative;
+        line-height: 13px;
+        font-size: 11px;
+        font-family: "Courier New", Courier, monospace;
+        font-weight: 400;
+        color: rgb(33, 33, 33);
+        margin: 0px;
+        padding: 5px 5px;
+        flex: 1;
+        text-overflow: ellipsis;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h2>Twitter Bot</h2>
+    </header>
+    <div class="ideasWrapper">
+      <section id="ideas">
+        <header>
+          <h6>Tweet Ideas</h6>
+          <div class="inputWrapper">
+            <input id="idea" placeholder="ideas blah blah" />
+            <button id="save_idea">Save 💾</button>
+          </div>
+        </header>
+        <ul id="ideasList">
+          <li>
+            <span>
+              9quwh quohw eoih roiqhwe oiuqwhe oiqhe oiquhe oiqwuweh oqiuh
+              qiouqhwe
+            </span>
+            <button>🗑️</button>
+          </li>
+        </ul>
+      </section>
+
+      <section id="threads">
+        <header>
+          <h6>Tweet Thread</h6>
+          <div class="inputWrapper">
+            <input id="thread" placeholder="thread blah blah" />
+            <button id="save_thread">Save 💾</button>
+          </div>
+        </header>
+        <ul id="threadsList">
+          <li>
+            <span>
+              9quwh quohw eoih roiqhwe oiuqwhe oiqhe oiquhe oiqwuweh oqiuh
+              qiouqhwe
+            </span>
+            <button>🗑️</button>
+          </li>
+        </ul>
+      </section>
+
+      <section id="clones">
+        <header>
+          <h6>Tweet Clone</h6>
+          <div class="inputWrapper">
+            <input id="clone" placeholder="clone blah blah" />
+            <button id="save_clone">Save 💾</button>
+          </div>
+        </header>
+        <ul id="clonesList">
+          <li>
+            <span>
+              9quwh quohw eoih roiqhwe oiuqwhe oiqhe oiquhe oiqwuweh oqiuh
+              qiouqhwe
+            </span>
+            <button>🗑️</button>
+          </li>
+        </ul>
+      </section>
+
+      <section id="articles">
+        <header>
+          <h6>Article Urls</h6>
+          <div class="inputWrapper">
+            <input id="article" placeholder="example.com" />
+            <button id="save_url">Save 💾</button>
+          </div>
+        </header>
+        <ul id="articlesList">
+          <li>
+            <span>
+              9quwh quohw eoih roiqhwe oiuqwhe oiqhe oiquhe oiqwuweh oqiuh
+              qiouqhwe
+            </span>
+            <button>🗑️</button>
+          </li>
+        </ul>
+      </section>
+    </div>
+
+    <script>
+      async function saveData(url, data) {
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+          if (response.ok) {
+            const result = await response.json();
+            console.log("Data saved successfully:", result);
+          } else {
+            console.error(
+              "Error saving data:",
+              response.status,
+              response.statusText,
+            );
+          }
+        } catch (error) {
+          console.error("Fetch error:", error);
+        }
+      }
+
+      async function deleteData(url, data) {
+        try {
+          const response = await fetch(url, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          });
+          if (response.ok) {
+            const result = await response.json();
+            console.log("Data deleted successfully:", result);
+          } else {
+            console.error(
+              "Error saving data:",
+              response.status,
+              response.statusText,
+            );
+          }
+        } catch (error) {
+          console.error("Fetch error:", error);
+        }
+      }
+
+      // Fetch the data from the API
+      async function fetchIdeas() {
+        try {
+          const response = await fetch("http://localhost:8080/api/ideas");
+          const jsonData = await response.json();
+
+          // Check if the response status is ok
+          if (jsonData.code === 200 && jsonData.status === "Ok") {
+            const ideasList = document.getElementById("ideasList");
+
+            // Clear the current list (if needed)
+            ideasList.innerHTML = "";
+
+            // Loop through the data and create <li> elements
+            jsonData.data.forEach((item) => {
+              const li = document.createElement("li");
+
+              // Create the span element for the idea text
+              const span = document.createElement("span");
+              span.textContent = item.idea;
+
+              // Create the delete button
+              const button = document.createElement("button");
+              button.textContent = "🗑️";
+              button.addEventListener("click", () => {
+                li.remove(); // Remove the item when the button is clicked
+              });
+
+              // Append the span and button to the li
+              li.appendChild(span);
+              li.appendChild(button);
+
+              // Append the li to the list
+              ideasList.appendChild(li);
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching ideas:", error);
+        }
+      }
+
+      // Call fetchIdeas when the page loads
+      document.addEventListener("DOMContentLoaded", fetchIdeas);
+
+      async function fetchThreads() {
+        try {
+          const response = await fetch("http://localhost:8080/api/threads");
+          const jsonData = await response.json();
+
+          // Check if the response status is ok
+          if (jsonData.code === 200 && jsonData.status === "Ok") {
+            const ideasList = document.getElementById("threadsList");
+
+            // Clear the current list (if needed)
+            ideasList.innerHTML = "";
+
+            // Loop through the data and create <li> elements
+            jsonData.data.forEach((item) => {
+              const li = document.createElement("li");
+
+              // Create the span element for the idea text
+              const span = document.createElement("span");
+              span.textContent = item.idea;
+
+              // Create the delete button
+              const button = document.createElement("button");
+              button.textContent = "🗑️";
+              button.addEventListener("click", () => {
+                li.remove(); // Remove the item when the button is clicked
+              });
+
+              // Append the span and button to the li
+              li.appendChild(span);
+              li.appendChild(button);
+
+              // Append the li to the list
+              ideasList.appendChild(li);
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching ideas:", error);
+        }
+      }
+
+      // Call fetchIdeas when the page loads
+      document.addEventListener("DOMContentLoaded", fetchThreads);
+
+      async function fetchClones() {
+        try {
+          const response = await fetch("http://localhost:8080/api/clones");
+          const jsonData = await response.json();
+
+          // Check if the response status is ok
+          if (jsonData.code === 200 && jsonData.status === "Ok") {
+            const ideasList = document.getElementById("clonesList");
+
+            // Clear the current list (if needed)
+            ideasList.innerHTML = "";
+
+            // Loop through the data and create <li> elements
+            jsonData.data.forEach((item) => {
+              const li = document.createElement("li");
+
+              // Create the span element for the idea text
+              const span = document.createElement("span");
+              span.textContent = item.tweet;
+
+              // Create the delete button
+              const button = document.createElement("button");
+              button.textContent = "🗑️";
+              button.addEventListener("click", () => {
+                li.remove(); // Remove the item when the button is clicked
+              });
+
+              // Append the span and button to the li
+              li.appendChild(span);
+              li.appendChild(button);
+
+              // Append the li to the list
+              ideasList.appendChild(li);
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching ideas:", error);
+        }
+      }
+
+      // Call fetchIdeas when the page loads
+      document.addEventListener("DOMContentLoaded", fetchClones);
+
+      async function fetchArticles() {
+        try {
+          const response = await fetch("http://localhost:8080/api/articles");
+          const jsonData = await response.json();
+
+          // Check if the response status is ok
+          if (jsonData.code === 200 && jsonData.status === "Ok") {
+            const ideasList = document.getElementById("articlesList");
+
+            // Clear the current list (if needed)
+            ideasList.innerHTML = "";
+
+            // Loop through the data and create <li> elements
+            jsonData.data.forEach((item) => {
+              const li = document.createElement("li");
+
+              // Create the span element for the idea text
+              const span = document.createElement("span");
+              span.textContent = item.url;
+
+              // Create the delete button
+              const button = document.createElement("button");
+              button.textContent = "🗑️";
+              button.addEventListener("click", async () => {
+                await deleteData();
+                li.remove(); // Remove the item when the button is clicked
+              });
+
+              // Append the span and button to the li
+              li.appendChild(span);
+              li.appendChild(button);
+
+              // Append the li to the list
+              ideasList.appendChild(li);
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching ideas:", error);
+        }
+      }
+
+      // Call fetchIdeas when the page loads
+      document.addEventListener("DOMContentLoaded", fetchArticles);
+
+      // get input and save from input to
+      document.addEventListener("DOMContentLoaded", async function () {
+        const saveIdea = document.getElementById("save_idea");
+        const saveThread = document.getElementById("save_thread");
+        const saveClone = document.getElementById("save_clone");
+        const saveArticle = document.getElementById("save_url");
+
+        const ideaInput = document.getElementById("idea");
+        const threadInput = document.getElementById("thread");
+        const cloneInput = document.getElementById("clone");
+        const articleInput = document.getElementById("article");
+
+        // Save idea
+        saveIdea.addEventListener("click", async function () {
+          const idea = ideaInput.value.trim();
+          if (idea) {
+            await saveData("http://localhost:8080/api/ideas", {
+              idea: idea,
+              used_count: 1,
+            });
+            await fetchIdeas();
+          } else {
+            alert("Idea cannot be empty!");
+          }
+        });
+
+        // Save thread
+        saveThread.addEventListener("click", async function () {
+          const thread = threadInput.value.trim();
+          if (thread) {
+            await saveData("http://localhost:8080/api/threads", {
+              idea: thread,
+              used_count: 1,
+            });
+            await fetchThreads();
+          } else {
+            alert("Thread cannot be empty!");
+          }
+        });
+
+        // Save clone
+        saveClone.addEventListener("click", async function () {
+          const clone = cloneInput.value.trim();
+          if (clone) {
+            await saveData("http://localhost:8080/api/clone", {
+              tweet: clone,
+              author_name: "",
+            });
+            await fetchClones();
+          } else {
+            alert("Clone cannot be empty!");
+          }
+        });
+
+        // Save article
+        saveArticle.addEventListener("click", async function () {
+          const article = articleInput.value.trim();
+          if (article) {
+            await saveData("http://localhost:8080/api/articles", {
+              url: article,
+              title: "",
+            });
+            await fetchArticles();
+          } else {
+            alert("Article URL cannot be empty!");
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

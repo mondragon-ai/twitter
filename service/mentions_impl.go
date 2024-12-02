@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/twitter/data/request"
 	"github.com/twitter/data/response"
@@ -31,10 +32,14 @@ func (b *MentionsServiceImpl) Create(ctx context.Context, request request.Mentio
 }
 
 // Delete implements MentionService
-func (b *MentionsServiceImpl) Delete(ctx context.Context, mentionId string) {
+func (b *MentionsServiceImpl) Delete(ctx context.Context, mentionId int) {
 	mention, err := b.MentionRepository.FindMentionById(ctx, mentionId)
 	helper.PanicIfError(err)
-	b.MentionRepository.DeleteMention(ctx, mention.TweetID)
+
+    id, err := strconv.Atoi(mention.TweetID)
+    helper.PanicIfError(err)
+
+	b.MentionRepository.DeleteMention(ctx, id)
 }
 
 // FindAll implements MentionService
@@ -58,7 +63,7 @@ func (b *MentionsServiceImpl) FindAll(ctx context.Context) []response.MentionRes
 }
 
 // FindById implements MentionService
-func (b *MentionsServiceImpl) FindById(ctx context.Context, mentionId string) (*response.MentionResponse, error) {
+func (b *MentionsServiceImpl) FindById(ctx context.Context, mentionId int) (*response.MentionResponse, error) {
 	mention, err := b.MentionRepository.FindMentionById(ctx, mentionId)
 	if err != nil {
 		return nil, err
@@ -87,8 +92,8 @@ func (b *MentionsServiceImpl) CreateTweetIdea(ctx context.Context, request reque
 }
 
 // Delete Tweet Idea
-func (b *MentionsServiceImpl) DeleteTweetIdea(ctx context.Context, ideaID string) {
-	b.MentionRepository.DeleteMention(ctx, ideaID)
+func (b *MentionsServiceImpl) DeleteTweetIdea(ctx context.Context, ideaID int) {
+	b.MentionRepository.DeleteTweetIdea(ctx, ideaID)
 }
 
 // Find All Tweet Ideas
@@ -123,8 +128,8 @@ func (b *MentionsServiceImpl) CreateTweetClone(ctx context.Context, request requ
 }
 
 // Delete Tweet Clone Idea
-func (b *MentionsServiceImpl) DeleteTweetClone(ctx context.Context, cloneID string) {
-	b.MentionRepository.DeleteMention(ctx, cloneID)
+func (b *MentionsServiceImpl) DeleteTweetClone(ctx context.Context, cloneID int) {
+	b.MentionRepository.DeleteTweetClone(ctx, cloneID)
 }
 
 // Find All Tweet Clone Ideas
@@ -158,8 +163,8 @@ func (b *MentionsServiceImpl) CreateThreadIdea(ctx context.Context, request requ
 }
 
 // Delete Tweet Thread Idea
-func (b *MentionsServiceImpl) DeleteThreadIdea(ctx context.Context, threadID string) {
-	b.MentionRepository.DeleteMention(ctx, threadID)
+func (b *MentionsServiceImpl) DeleteThreadIdea(ctx context.Context, threadID int) {
+	b.MentionRepository.DeleteThreadIdea(ctx, threadID)
 }
 
 // Find All Tweet Thread Ideas
@@ -193,8 +198,8 @@ func (b *MentionsServiceImpl) CreateArticleUrl(ctx context.Context, request requ
 }
 
 // Delete Article Url
-func (b *MentionsServiceImpl) DeleteArticleUrl(ctx context.Context, articleID string) {
-	b.MentionRepository.DeleteMention(ctx, articleID)
+func (b *MentionsServiceImpl) DeleteArticleUrl(ctx context.Context, articleID int) {
+	b.MentionRepository.DeleteArticleUrl(ctx, articleID)
 }
 
 // Find All Article Urls
