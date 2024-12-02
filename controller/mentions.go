@@ -75,3 +75,48 @@ func (controller *MentionsController) FindById(writer http.ResponseWriter, reque
 
 	helper.WriteResponseBody(writer, webResponse)
 }
+
+
+
+
+
+// Save Tweet Idea
+func (controller *MentionsController) CreateTweetIdea(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
+	tweetIdeaRequest := request.TweetIdea{}
+	helper.ReadRequestBody(requests, &tweetIdeaRequest)
+
+	controller.MentionService.CreateTweetIdea(requests.Context(), tweetIdeaRequest)
+	webResponse := response.WebResponse{
+		Code:   200,
+		Status: "Ok",
+		Data:   nil,
+	}
+
+	helper.WriteResponseBody(writer, webResponse)
+}
+
+// Delete Tweet Idea
+func (controller *MentionsController) DeleteTweetIdea(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
+	mentionId := params.ByName("mentionId")
+
+	controller.MentionService.Delete(requests.Context(), mentionId)
+	webResponse := response.WebResponse{
+		Code:   200,
+		Status: "Ok",
+		Data:   nil,
+	}
+
+	helper.WriteResponseBody(writer, webResponse)
+}
+
+// FindAll Tweet Idea
+func (controller *MentionsController) FindAllTweetIdeas(writer http.ResponseWriter, requests *http.Request, params httprouter.Params) {
+	result := controller.MentionService.FindAll(requests.Context())
+	webResponse := response.WebResponse{
+		Code:   200,
+		Status: "Ok",
+		Data:   result,
+	}
+
+	helper.WriteResponseBody(writer, webResponse)
+}

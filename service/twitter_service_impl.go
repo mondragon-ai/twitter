@@ -260,18 +260,6 @@ func (t *TwitterServiceImpl) PostTweet(ctx context.Context, request request.Twee
 	return nil, fmt.Errorf("failed to post tweet: %v", "TEST")
 }
 
-// // Helper function to extract mentions from tweet text
-// func extractMentions(tweetText string) []string {
-// 	var mentions []string
-// 	words := strings.Split(tweetText, " ")
-// 	for _, word := range words {
-// 		if strings.HasPrefix(word, "@") {
-// 			mentions = append(mentions, word)
-// 		}
-// 	}
-// 	return mentions
-// }
-
 func (t *TwitterServiceImpl) ReplyMention(ctx context.Context, mentionId string) {
 }
 

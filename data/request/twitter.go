@@ -69,3 +69,23 @@ type RootTweetMentions struct {
 	Data 		[]Tweet 	`json:"data"`
 	Includes	Includes	`json:"includes"`
 }
+
+type UrlCreate struct {
+	Url		string			`json:"url"`
+	Title	string      	`json:"title"`
+}
+
+type TweetClone struct {
+	AuthorName	string		`json:"author_name,omitempty"`
+	Tweet		string      `json:"title"`
+}
+
+type ThreadIdea struct {
+	Idea		string		`json:"idea,omitempty"`
+	UsedCount	int      	`json:"used_count"`
+}
+
+type TweetIdea struct {
+	Idea		string		`json:"idea,omitempty"`
+	UsedCount	int      	`json:"used_count"`
+}
