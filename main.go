@@ -31,9 +31,13 @@ func main() {
 	helper.PanicIfError(err)
 
 	// Ensure the mention table exists
+	// err = config.ResetDB(db)
+	// if err != nil {
+	// 	log.Fatal("Could not delete tables: ", err)
+	// }
 	err = config.CreateDB(db)
 	if err != nil {
-		log.Fatal("Could not create table: ", err)
+		log.Fatal("Could not create tables: ", err)
 	}
 
 	// repository

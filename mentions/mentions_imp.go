@@ -138,13 +138,13 @@ func (b *MentionRepositoryImpl) SaveTweetIdea(ctx context.Context, idea model.Tw
 	defer helper.CommitOrRollback(tx)
 
 	SQL :=  `
-		INSERT INTO ideas (id, idea, used_count)
-		VALUES ($1, $2, $3)
+		INSERT INTO ideas (idea, used_count)
+		VALUES ($1, $2,)
 		ON CONFLICT (id) DO NOTHING;
 	`
 
 	// Execute the query with the idea data
-	_, err = tx.ExecContext(ctx, SQL, idea.ID, idea.Idea, idea.UsedCount)
+	_, err = tx.ExecContext(ctx, SQL, idea.Idea, idea.UsedCount)
 	helper.PanicIfError(err)
 }
 
@@ -193,13 +193,13 @@ func (b *MentionRepositoryImpl) SaveThreadIdea(ctx context.Context, thread model
 	defer helper.CommitOrRollback(tx)
 
 	SQL :=  `
-		INSERT INTO threads (id, idea, used_count)
-		VALUES ($1, $2, $3)
+		INSERT INTO threads (idea, used_count)
+		VALUES ($1, $2)
 		ON CONFLICT (id) DO NOTHING;
 	`
 
 	// Execute the query with the idea data
-	_, err = tx.ExecContext(ctx, SQL, thread.ID, thread.Idea, thread.UsedCount)
+	_, err = tx.ExecContext(ctx, SQL, thread.Idea, thread.UsedCount)
 	helper.PanicIfError(err)
 }
 
@@ -223,7 +223,7 @@ func (b *MentionRepositoryImpl) FindAllTweetClones(ctx context.Context) ([]model
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
 
-	SQL := "SELECT id, author_name, title FROM clones"
+	SQL := "SELECT id, author_name, tweet FROM clones"
 	result, errQuery := tx.QueryContext(ctx, SQL)
 	helper.PanicIfError(errQuery)
 	defer result.Close()
@@ -248,13 +248,13 @@ func (b *MentionRepositoryImpl) SaveTweetClone(ctx context.Context, clone model.
 	defer helper.CommitOrRollback(tx)
 
 	SQL :=  `
-		INSERT INTO clones (id, author_name, title)
-		VALUES ($1, $2, $3)
+		INSERT INTO clones (author_name, tweet)
+		VALUES ($1, $2)
 		ON CONFLICT (id) DO NOTHING;
 	`
 
 	// Execute the query with the idea data
-	_, err = tx.ExecContext(ctx, SQL, clone.ID, clone.AuthorName, clone.Tweet)
+	_, err = tx.ExecContext(ctx, SQL, clone.AuthorName, clone.Tweet)
 	helper.PanicIfError(err)
 }
 
@@ -278,7 +278,7 @@ func (b *MentionRepositoryImpl) FindAllArticleUrls(ctx context.Context) ([]model
 	helper.PanicIfError(err)
 	defer helper.CommitOrRollback(tx)
 
-	SQL := "SELECT id, title, url FROM articles"
+	SQL := "SELECT id, url, title FROM articles"
 	result, errQuery := tx.QueryContext(ctx, SQL)
 	helper.PanicIfError(errQuery)
 	defer result.Close()
@@ -287,7 +287,7 @@ func (b *MentionRepositoryImpl) FindAllArticleUrls(ctx context.Context) ([]model
 
 	for result.Next() {
 		article := model.ArticleUrl{}
-		err := result.Scan(&article.ID, &article.Title, article.Url)
+		err := result.Scan(&article.ID, &article.Url, &article.Title)
 		helper.PanicIfError(err)
 
 		articles = append(articles, article)
@@ -303,13 +303,13 @@ func (b *MentionRepositoryImpl) SaveArticleUrl(ctx context.Context, article mode
 	defer helper.CommitOrRollback(tx)
 
 	SQL :=  `
-		INSERT INTO articles (id, title, url)
-		VALUES ($1, $2, $3)
+		INSERT INTO articles (title, url)
+		VALUES ($1, $2)
 		ON CONFLICT (id) DO NOTHING;
 	`
 
 	// Execute the query with the url data
-	_, err = tx.ExecContext(ctx, SQL, article.ID, article.Title, article.Url)
+	_, err = tx.ExecContext(ctx, SQL, article.Title, article.Url)
 	helper.PanicIfError(err)
 }
 

@@ -77,7 +77,7 @@ type UrlCreate struct {
 
 type TweetClone struct {
 	AuthorName	string		`json:"author_name,omitempty"`
-	Tweet		string      `json:"title"`
+	Tweet		string      `json:"tweet"`
 }
 
 type ThreadIdea struct {
