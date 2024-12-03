@@ -135,7 +135,7 @@ func InternalCall() {
 	}
 	requestBody := bytes.NewBuffer(bodyJSON)
 
-	url := "http://localhost:8080/api/twitter/tweet"
+	url := "https://twitter-bot-angel-416be0075ba0.herokuapp.com/api/twitter/tweet"
     req, err := http.NewRequest(http.MethodPost, url, requestBody)
     if err != nil {
         log.Fatal(err)
@@ -187,8 +187,8 @@ func postType() string {
 func shouldPost() bool {
     // You can adjust the weights as needed.
     weights := map[bool]int{
-        true:  6,  
-        false: 4, 
+        true:  8,  
+        false: 2, 
     }
     totalWeight := 0
     for _, weight := range weights {
