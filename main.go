@@ -1,12 +1,20 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/robfig/cron"
 
 	"github.com/twitter/config"
 	"github.com/twitter/controller"
@@ -52,6 +60,7 @@ func main() {
 	// if err != nil {
 	// 	log.Fatal("Could not delete tables: ", err)
 	// }
+
 	err = config.CreateDB(db)
 	if err != nil {
 		log.Fatal("Could not create tables: ", err)
@@ -81,123 +90,127 @@ func main() {
 		Handler: enableCORS(routes),
 	}
 
-    log.Printf("Starting server on port %s\n", port)
-    err = server.ListenAndServe()
-    helper.PanicIfError(err)
+	// Setup Cron job
+	c := cron.New()
+	c.AddFunc("0 30 * * * *", func() {
+		log.Println("Ready to Tweet...")
+		if shouldPost() && isWithinAllowedTimezone() {
+			log.Println("[TWEETED]")
+			InternalCall()
+		}
+	})
+	c.Start()
 
+	// Channel to receive termination signals
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+
+	// Run the server in a goroutine
+	go func() {
+		log.Printf("Starting server on port %s\n", port)
+		err := server.ListenAndServe()
+		helper.PanicIfError(err)
+	}()
+
+	// Wait for a termination signal
+	<-sig
+	log.Println("Shutting down gracefully...")
+
+	// Stop the Cron job scheduler
+	c.Stop()
+	log.Println("Cron job scheduler stopped")
 }
 
+func InternalCall() {
 
-// package main
+	tweetType := postType()
+	body := map[string]interface{}{
+		"type": tweetType,
+	}
 
-// import (
-// 	"fmt"
-// 	"log"
-// 	"math/rand"
-// 	"net/http"
-// 	"os"
-// 	"os/signal"
-// 	"syscall"
-// 	"time"
+    // Prepare request body if applicable
+	bodyJSON, err := json.Marshal(body)
+	if err != nil {
+		log.Printf("Failed to marshal request body: %v", err)
+	}
+	requestBody := bytes.NewBuffer(bodyJSON)
 
-// 	"github.com/gorilla/mux"
-// 	"github.com/robfig/cron"
-// 	"github.com/twitter/apis/twitter"
-// )
+	url := "http://localhost:8080/api/twitter/tweet"
+    req, err := http.NewRequest(http.MethodPost, url, requestBody)
+    if err != nil {
+        log.Fatal(err)
+    }
+    req.Header.Add("Accept", "application/json")
 
+    resp, err := http.DefaultClient.Do(req)
+    if err != nil {
+        log.Fatal(err)
+    }
 
-// func main() {
-// 	//Load env
-// 	// err := godotenv.Load()
-// 	// if err != nil {
-// 	// 	log.Fatal("Error loading .env file")
-// 	// 	fmt.Println("Error loading .env file")
-// 	// }
+    if resp == nil || resp.Body == nil {
+        log.Fatal("Received nil response or response body from Twitter API")
+    }
 
-// 	fmt.Println("Starting Server")
+    if resp.StatusCode != http.StatusOK {
+        bodyBytes, _ := io.ReadAll(resp.Body)
+        log.Printf("Twitter API error: %s", string(bodyBytes))
+    }
 
-// 	m := mux.NewRouter()
-// 	m.HandleFunc("/", func(writer http.ResponseWriter, _ *http.Request) {
-// 		writer.WriteHeader(200)
-// 		fmt.Fprintf(writer, "Server is up and running")
-// 	})
-// 	m.HandleFunc("/tweet", twitter.Tweet).Methods("POST")
+    defer resp.Body.Close()
+    if err != nil {
+        log.Fatal(err)
+    }
+}
 
-// 	//Start Server
-// 	server := &http.Server{
-// 		Handler: m,
-// 	}
+func postType() string {
+    weights := map[string]int{
+        "clone":  15,
+        "create": 60,
+        "article": 15,
+        "thread": 10,
+    }
+    totalWeight := 0
+    for _, weight := range weights {
+        totalWeight += weight
+    }
 
-//     // Retrieve the port from the environment variable or default to 8080
-//     port := os.Getenv("PORT")
-//     if port == "" {
-//         port = "8080"
-//     }
+    num := rand.Intn(totalWeight)
+    for val, weight := range weights {
+        if num < weight {
+            return val
+        }
+        num -= weight
+    }
+    return "create"
+}
 
-//     server.Addr = ":" + port
-// 	// server.Addr = ":8080"
+func shouldPost() bool {
+    // You can adjust the weights as needed.
+    weights := map[bool]int{
+        true:  2,  
+        false: 8, 
+    }
+    totalWeight := 0
+    for _, weight := range weights {
+        totalWeight += weight
+    }
+    num := rand.Intn(totalWeight)
+    for val, weight := range weights {
+        if num < weight {
+            return val
+        }
+        num -= weight
+    }
+    return false
+}
 
-// 	// Setup Cron job
-// 	c := cron.New()
-// 	c.AddFunc("0 30 * * * *", func() {
-// 		fmt.Println("Ready to Tweet...")
-// 		if shouldPost() && isWithinAllowedTimezone() {
-// 			fmt.Println("[TWEETED]")
-// 			twitter.Post()
-// 		}
-// 	})
-// 	c.Start()
-
-// 	// Start HTTP server
-// 	go func() {
-// 		if err := server.ListenAndServe(); err != nil {
-// 			log.Fatal(err)
-// 		}
-// 	}()
-
-// 	// Wait for the Cron job to run
-// 	// time.Sleep(5 * time.Minute)
-
-
-//     // Wait for a signal to gracefully exit the program
-//     sig := make(chan os.Signal, 1)
-//     signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
-//     <-sig
-
-
-// 	// Stop the Cron job scheduler
-// 	c.Stop()
-// }
-
-
-// func shouldPost() bool {
-//     // You can adjust the weights as needed.
-//     weights := map[bool]int{
-//         true:  2,  
-//         false: 8, 
-//     }
-//     totalWeight := 0
-//     for _, weight := range weights {
-//         totalWeight += weight
-//     }
-//     num := rand.Intn(totalWeight)
-//     for val, weight := range weights {
-//         if num < weight {
-//             return val
-//         }
-//         num -= weight
-//     }
-//     return false
-// }
-
-
-// func isWithinAllowedTimezone() bool {
-//     loc, err := time.LoadLocation("America/Chicago")
-//     if err != nil {
-//         return false
-//     }
-//     current := time.Now().In(loc)
-//     hour := current.Hour()
-//     return hour >= 5 && hour < 23 
-// }
+func isWithinAllowedTimezone() bool {
+    loc, err := time.LoadLocation("America/Chicago")
+    if err != nil {
+        return false
+    }
+    current := time.Now().In(loc)
+    hour := current.Hour()
+    return hour >= 5 && hour < 23 
+}
 

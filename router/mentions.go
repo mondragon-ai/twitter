@@ -1,8 +1,6 @@
 package router
 
 import (
-	"fmt"
-
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -13,9 +11,9 @@ import (
 func MentionsRouter(mentionController *controller.MentionsController, twitterController *controller.TwitterController) *httprouter.Router {
 	router := httprouter.New()
 
-	router.GET("/", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		fmt.Fprint(w, "Welcome Home")
-	})
+    router.GET("/", func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+        http.ServeFile(w, r, "index.html") // Ensure the correct path to your HTML file
+    })
 
 	router.GET("/api/mentions", mentionController.FindAll)
 	router.GET("/api/mentions/:mentionId", mentionController.FindById)

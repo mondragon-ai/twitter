@@ -208,10 +208,12 @@ func generateCreativePrompt(db mentions.MentionRepository, ctx context.Context) 
 	// Delete tweet from DB -> void
 	// db.DeleteTweetIdea(ctx, mentionsResp[0].ID)
 
+
+	randomIndex := rand.Intn(len(mentionsResp))
 	// randomTopic := getRandomTopic()
 	return []request.OpenAIMessage{
 		{Role: "system", Content: content},
-		{Role: "user", Content: mentionsResp[0].Idea},
+		{Role: "user", Content: mentionsResp[randomIndex].Idea},
 	}
 }
 
@@ -277,9 +279,11 @@ func generateClonePrompt(db mentions.MentionRepository, ctx context.Context) []r
 
 
 	// Pass content to openai -> string
+
+	randomIndex := rand.Intn(len(mentionsResp))
 	return []request.OpenAIMessage{
 		{Role: "system", Content: content},
-		{Role: "user", Content: mentionsResp[0].Tweet},
+		{Role: "user", Content: mentionsResp[randomIndex].Tweet},
 	}
 }
 
@@ -369,7 +373,8 @@ func generateArticlePrompt(db mentions.MentionRepository, ctx context.Context,) 
 	}
 
 	// fetch article from url (fetch) -> string
-	cleaned, err := FetchAndCleanURL(articles[0].Url)
+	randomIndex := rand.Intn(len(articles))
+	cleaned, err := FetchAndCleanURL(articles[randomIndex].Url)
 	if err != nil {
 		return nil
 	}
@@ -470,8 +475,6 @@ func cleanThread(thread string, t *TwitterServiceImpl, ctx context.Context) *htt
 	return resp
 }
 
-
-
 // GetOpenAIMessages returns a slice of predefined OpenAIMessage
 func generateThreadPrompt(db mentions.MentionRepository, ctx context.Context,) []request.OpenAIMessage {
 
@@ -571,9 +574,10 @@ func generateThreadPrompt(db mentions.MentionRepository, ctx context.Context,) [
 	// Delete tweet from DB -> void
 	// db.DeleteTweetIdea(ctx, mentionsResp[0].ID)
 
+	randomIndex := rand.Intn(len(threads))
 	return []request.OpenAIMessage{
 		{Role: "system", Content: content},
-		{Role: "user", Content: threads[0].Idea},
+		{Role: "user", Content: threads[randomIndex].Idea},
 	}
 }
 
