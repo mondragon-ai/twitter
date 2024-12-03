@@ -49,7 +49,6 @@
         flex-direction: column;
         justify-content: flex-start;
         align-items: flex-start;
-        overflow-y: scroll;
       }
 
       .ideasWrapper section header {
@@ -118,6 +117,9 @@
         justify-content: flex-start;
         align-items: center;
         box-sizing: border-box;
+      }
+      ul {
+        overflow-y: scroll;
       }
       ul li {
         padding: 0.5rem;
@@ -306,8 +308,9 @@
               // Create the delete button
               const button = document.createElement("button");
               button.textContent = "🗑️";
-              button.addEventListener("click", () => {
-                li.remove(); // Remove the item when the button is clicked
+              button.addEventListener("click", async () => {
+                await deleteData(`http://localhost:8080/api/ideas/${item.id}`);
+                li.remove();
               });
 
               // Append the span and button to the li
@@ -349,8 +352,11 @@
               // Create the delete button
               const button = document.createElement("button");
               button.textContent = "🗑️";
-              button.addEventListener("click", () => {
-                li.remove(); // Remove the item when the button is clicked
+              button.addEventListener("click", async () => {
+                await deleteData(
+                  `http://localhost:8080/api/threads/${item.id}`,
+                );
+                li.remove();
               });
 
               // Append the span and button to the li
@@ -392,8 +398,9 @@
               // Create the delete button
               const button = document.createElement("button");
               button.textContent = "🗑️";
-              button.addEventListener("click", () => {
-                li.remove(); // Remove the item when the button is clicked
+              button.addEventListener("click", async () => {
+                await deleteData(`http://localhost:8080/api/clone/${item.id}`);
+                li.remove();
               });
 
               // Append the span and button to the li
@@ -436,8 +443,10 @@
               const button = document.createElement("button");
               button.textContent = "🗑️";
               button.addEventListener("click", async () => {
-                await deleteData();
-                li.remove(); // Remove the item when the button is clicked
+                await deleteData(
+                  `http://localhost:8080/api/articles/${item.id}`,
+                );
+                li.remove();
               });
 
               // Append the span and button to the li
@@ -477,6 +486,7 @@
               used_count: 1,
             });
             await fetchIdeas();
+            ideaInput.value = "";
           } else {
             alert("Idea cannot be empty!");
           }
@@ -491,6 +501,7 @@
               used_count: 1,
             });
             await fetchThreads();
+            threadInput.value = "";
           } else {
             alert("Thread cannot be empty!");
           }
@@ -505,6 +516,7 @@
               author_name: "",
             });
             await fetchClones();
+            cloneInput.value = "";
           } else {
             alert("Clone cannot be empty!");
           }
@@ -519,6 +531,7 @@
               title: "",
             });
             await fetchArticles();
+            articleInput.value = "";
           } else {
             alert("Article URL cannot be empty!");
           }

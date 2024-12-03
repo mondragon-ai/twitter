@@ -12,7 +12,9 @@ import (
 
 	"github.com/twitter/data/request"
 	"github.com/twitter/data/response"
+	"github.com/twitter/helper"
 	"github.com/twitter/mentions"
+	"github.com/twitter/model"
 
 	"golang.org/x/net/html"
 )
@@ -106,14 +108,16 @@ func filterWordsWithHash(input string) string {
 	return filtered
 }
 
+
 // GetOpenAIMessages returns a slice of predefined OpenAIMessage
-func generateCreativePrompt() []request.OpenAIMessage {
+func generateGenPrompt() []request.OpenAIMessage {
 	content := `
 		You are a brilliantly sarcastic tech and crypto influencer with a comedic twist. Your tone is a blend of Alex Becker's sharp wit and Elon Musk's unpredictable humor, with a sprinkle of Silicon Valley genius. Your goal is to generate concise, witty, and slightly edgy tweets that appeal to the crypto and investing world.
 
 		### **RESPONSE TONE:**
 		- Your tweets should be dripping with sarcasm and tech-savvy humor-- be savage, vulgar with a comedic tone.
 		- Be serious enough to sound credible but witty enough to make people laugh or think, "That hurts, but it's true."
+		- Feel free to use curse words like fuck, shit, asshole. It is supposed to be slimey finance bro degen shit-posting.
 
 		### **RESPONSE FORMAT:**
 		- Keep your responses under 200 characters.
@@ -130,11 +134,13 @@ func generateCreativePrompt() []request.OpenAIMessage {
 		### **INSTRUCTIONS:**
 		- Take the **topic idea** provided as inspiration and create a sharp, humorous tweet with a focus on crypto and investing. 
 		- No hashtags. No fluff. Just wit and wisdom wrapped in sarcasm -- be savage, vulgar with a comedic tone.
+		- Feel free to use curse words like fuck, shit, asshole. It is supposed to be slimey finance bro degen shit-posting.
 
 		---
 
 		Now, generate a tweet for the **topic idea** provided, using your sarcastic wit and deep knowledge of the crypto and investing world. Remember, no emojis, no hashtags, just pure brilliance.
 	`
+
 	randomTopic := getRandomTopic()
 	return []request.OpenAIMessage{
 		{Role: "system", Content: content},
@@ -143,13 +149,98 @@ func generateCreativePrompt() []request.OpenAIMessage {
 }
 
 // GetOpenAIMessages returns a slice of predefined OpenAIMessage
-func generateClonePrompt(db mentions.MentionRepository, ctx context.Context,) []request.OpenAIMessage {
+func generateCreativePrompt(db mentions.MentionRepository, ctx context.Context) []request.OpenAIMessage {
 
-	// TODO: Fetch tweet from DB -> string
-	// TODO: Delete tweet from DB -> void
+	// Fetch tweet from DB -> string
+	list, err := db.FindAllTweetIdeas(ctx)
+	helper.PanicIfError(err)
 
-	// TODO: Pass content to openai -> string
+	if list == nil {
+		fmt.Print("no thread ideas available: Generating generic tweet")
+		return generateGenPrompt()
+	}
 
+	var mentionsResp []model.TweetIdea
+	for _, value := range list {
+		mention := model.TweetIdea{
+			ID: value.ID,
+			Idea: value.Idea,
+			UsedCount: value.UsedCount,
+		}
+		mentionsResp = append(mentionsResp, mention)
+	}
+
+	if mentionsResp == nil {
+		fmt.Print("no ideas available: Generating generic tweet")
+	}
+
+
+	content := `
+		You are a brilliantly sarcastic tech and crypto influencer with a comedic twist. Your tone is a blend of Alex Becker's sharp wit and Elon Musk's unpredictable humor, with a sprinkle of Silicon Valley genius. Your goal is to generate concise, witty, and slightly edgy tweets that appeal to the crypto and investing world.
+
+		### **RESPONSE TONE:**
+		- Your tweets should be dripping with sarcasm and tech-savvy humor-- be savage, vulgar with a comedic tone.
+		- Be serious enough to sound credible but witty enough to make people laugh or think, "That hurts, but it's true."
+		- Feel free to use curse words like fuck, shit, asshole. It is supposed to be slimey finance bro degen shit-posting.
+
+		### **RESPONSE FORMAT:**
+		- Keep your responses under 200 characters.
+		- Write in two or fewer short sentences.
+		- Do NOT use emojis, hashtags, or quotation marks.
+
+		### **RESPONSE CONTENT:**
+		- Focus on crypto, investing, and tech topics. Be humorous, satirical, and sharply opinionated.
+		- Use specific crypto trends, market dynamics, or startup culture quirks when relevant.
+		- If you don't have an answer, say, "Sorry, my magic 8-ball isn't predicting moonshots today."
+
+		---
+
+		### **INSTRUCTIONS:**
+		- Take the **topic idea** provided as inspiration and create a sharp, humorous tweet with a focus on crypto and investing. 
+		- No hashtags. No fluff. Just wit and wisdom wrapped in sarcasm -- be savage, vulgar with a comedic tone.
+		- Feel free to use curse words like fuck, shit, asshole. It is supposed to be slimey finance bro degen shit-posting.
+
+		---
+
+		Now, generate a tweet for the **topic idea** provided, using your sarcastic wit and deep knowledge of the crypto and investing world. Remember, no emojis, no hashtags, just pure brilliance.
+	`
+
+	// Delete tweet from DB -> void
+	// db.DeleteTweetIdea(ctx, mentionsResp[0].ID)
+
+	// randomTopic := getRandomTopic()
+	return []request.OpenAIMessage{
+		{Role: "system", Content: content},
+		{Role: "user", Content: mentionsResp[0].Idea},
+	}
+}
+
+// GetOpenAIMessages returns a slice of predefined OpenAIMessage
+func generateClonePrompt(db mentions.MentionRepository, ctx context.Context) []request.OpenAIMessage {
+
+	// Fetch tweet clone from DB -> string
+	list, err := db.FindAllTweetClones(ctx)
+	helper.PanicIfError(err)
+
+	if list == nil {
+		fmt.Print("no thread ideas available: Generating generic tweet")
+		return generateGenPrompt()
+	}
+
+	var mentionsResp []model.TweetClone
+	for _, value := range list {
+		mention := model.TweetClone{
+			ID: value.ID,
+			AuthorName: value.AuthorName,
+			Tweet: value.Tweet,
+		}
+		mentionsResp = append(mentionsResp, mention)
+	}
+
+	if mentionsResp == nil {
+		fmt.Print("no ideas available: Generating generic tweet")
+		return generateGenPrompt()
+	}
 	
 	content := `
 		You are a brilliantly sarcastic tech and crypto influencer with a comedic twist. Your tone is a blend of Alex Becker's sharp wit and Elon Musk's unpredictable humor, with a sprinkle of Silicon Valley genius. Your goal is to take an **existing tweet** provided and generate a sharp, witty, and sarcastic variation that captures the same humor and intent, with a focus on crypto and investing.
@@ -157,6 +248,7 @@ func generateClonePrompt(db mentions.MentionRepository, ctx context.Context,) []
 		### **RESPONSE TONE:**
 		- Your tweets should be dripping with sarcasm and tech-savvy humor—be savage, blunt, and comedic.
 		- Be serious enough to sound credible but witty enough to make people laugh or think, "That's savage, but I can't argue with it."
+		- Feel free to use curse words like fuck, shit, asshole. It is supposed to be slimey finance bro degen shit-posting.
 
 		### **RESPONSE FORMAT:**
 		- Keep your responses under 200 characters.
@@ -174,19 +266,20 @@ func generateClonePrompt(db mentions.MentionRepository, ctx context.Context,) []
 		- Take the **tweet provided** and generate a fresh variation with the same essence and comedic impact.
 		- Do not copy the tweet exactly. Your variation should feel new but inspired by the original.
 		- No hashtags. No fluff. Just wit and brilliance wrapped in sarcasm.
+		- Feel free to use curse words like fuck, shit, asshole. It is supposed to be slimey finance bro degen shit-posting.
 
 		---
 
 		Now, take the tweet provided and craft a witty, sarcastic variation that maintains the humor and insight. Keep it sharp, short, and savage.
 	`
+
+	// TODO: Delete tweet from DB -> void
+
+
+	// Pass content to openai -> string
 	return []request.OpenAIMessage{
 		{Role: "system", Content: content},
-		{Role: "user", Content: `
-		AI is 1000% the short term utility play.
-
-		I strongly thing NFTs and gaming is the longer out but just as big play come late q1/q2 2025.
-
-		The big brain move atm is into those, but I still think its early in ai.`},
+		{Role: "user", Content: mentionsResp[0].Tweet},
 	}
 }
 
@@ -211,6 +304,7 @@ func extractTextContent(n *html.Node) string {
 
 // FetchAndCleanURL fetches the content of the given URL and extracts only the text
 func FetchAndCleanURL(url string) (string, error) {
+
 	// Send a GET request
 	resp, err := http.Get(url)
 	if err != nil {
@@ -251,13 +345,31 @@ func FetchAndCleanURL(url string) (string, error) {
 // GetOpenAIMessages returns a slice of predefined OpenAIMessage
 func generateArticlePrompt(db mentions.MentionRepository, ctx context.Context,) []request.OpenAIMessage {
 
-	// TODO: Fetch url from DB -> string
-	// TODO: Delete tweet from DB -> void
-	mentions, err := db.FindAllMentions(ctx)
-	fmt.Print(mentions)
+	// Fetch url from DB -> string
+	list, err := db.FindAllArticleUrls(ctx)
+	helper.PanicIfError(err)
 
-	// TODO: fetch article from url (fetch) -> string
-	article, err := FetchAndCleanURL("https://crypto.news/murad-releases-table-of-meme-coin-metrics-to-evaluate-decentralization/")
+	if list == nil {
+		fmt.Print("no thread ideas available: Generating generic tweet")
+		return generateGenPrompt()
+	}
+
+	var articles []model.ArticleUrl
+	for _, value := range list {
+		article := model.ArticleUrl{
+			ID: value.ID,
+			Url: value.Url,
+			Title: value.Title,
+		}
+		articles = append(articles, article)
+	}
+
+	if articles == nil {
+		fmt.Print("no ideas available: Generating generic tweet")
+	}
+
+	// fetch article from url (fetch) -> string
+	cleaned, err := FetchAndCleanURL(articles[0].Url)
 	if err != nil {
 		return nil
 	}
@@ -267,7 +379,8 @@ func generateArticlePrompt(db mentions.MentionRepository, ctx context.Context,) 
 
 		### **RESPONSE TONE:**
 		- Your tweets should be dripping with sarcasm and tech-savvy humor—be savage, blunt, and comedic.
-		- Be serious enough to sound credible but witty enough to make people laugh or think, "That’s absurd, but it’s also true."
+		- Be serious enough to sound credible but witty enough to make people laugh or think, "That's absurd, but it's also true."
+		- Feel free to use curse words like fuck, shit, asshole. It is supposed to be slimey finance bro degen shit-posting.
 
 		### **RESPONSE FORMAT:**
 		- Keep your responses under 200 characters.
@@ -277,7 +390,8 @@ func generateArticlePrompt(db mentions.MentionRepository, ctx context.Context,) 
 		### **RESPONSE CONTENT:**
 		- Focus on crypto, investing, and tech topics. Be humorous, satirical, and sharply opinionated.
 		- Pull the most relevant, shocking, or ridiculous point from the article and turn it into a sarcastic take or humorous observation.
-		- If the article is vague or uninformative, say, "This article is fluffier than my dog’s tail. Try another one."
+		- If the article is vague or uninformative, say, "This article is fluffier than my dog's tail. Try another one."
+		- Feel free to use curse words like fuck, shit, asshole. It is supposed to be slimey finance bro degen shit-posting.
 
 		---
 
@@ -291,14 +405,181 @@ func generateArticlePrompt(db mentions.MentionRepository, ctx context.Context,) 
 		Now, take the provided article and craft a witty, sarcastic tweet summarizing its essence. Keep it sharp, short, and savage. If the article is fluff, call it out in a humorous way.
 	`
 
+	// Delete tweet from DB -> void
+	// db.DeleteTweetIdea(ctx, mentionsResp[0].ID)
+
 	return []request.OpenAIMessage{
 		{Role: "system", Content: content},
-		{Role: "user", Content: article},
+		{Role: "user", Content: cleaned},
 	}
 }
 
+
+func cleanThread(thread string, t *TwitterServiceImpl, ctx context.Context) *http.Response {
+	// Split the thread into individual tweets by double newlines
+	thread = strings.ReplaceAll(thread, "\r\n", "\n")
+	thread = strings.ReplaceAll(thread, "\\n\\n", "\n\n")
+
+	tweets := strings.Split(thread, "\n\n")
+
+	// Format tweets with double newlines after periods
+	for i := range tweets {
+		tweets[i] = strings.ReplaceAll(tweets[i], ". ", ".\n\n")
+		tweets[i] = strings.ReplaceAll(tweets[i], "*", "")
+	}
+
+	var resp *http.Response
+	var err error
+	var parentID *string
+
+	// Post the first tweet
+	resp, parentID, err = t.MakeThreadTweet(ctx, &tweets[0], nil)
+	if err != nil {
+		fmt.Printf("Error posting first tweet: %v\n", err)
+		return nil // Return nil if the first tweet fails
+	}
+	if parentID == nil {
+		fmt.Println("Parent ID is nil after posting the first tweet. Exiting.")
+		return resp
+	}
+
+	// Post the remaining tweets as replies
+	for _, tweet := range tweets[1:] {
+		fmt.Println("Tweeting:", tweet)
+		if tweet == "" {
+			continue
+		}
+		if parentID == nil {
+			fmt.Println("Parent ID is nil; cannot post subsequent tweet.")
+			return resp
+		}
+
+		var tweetID *string
+		resp, tweetID, err = t.MakeThreadTweet(ctx, &tweet, parentID)
+		if err != nil {
+			fmt.Printf("Error posting tweet: %v\n", err)
+			return resp
+		}
+		if tweetID == nil {
+			fmt.Println("Tweet ID is nil; cannot continue the thread.")
+			return resp
+		}
+		parentID = tweetID
+	}
+
+	return resp
+}
+
+
+
+// GetOpenAIMessages returns a slice of predefined OpenAIMessage
+func generateThreadPrompt(db mentions.MentionRepository, ctx context.Context,) []request.OpenAIMessage {
+
+	// Fetch url from DB -> string
+	list, err := db.FindAllThreadIdeas(ctx)
+	helper.PanicIfError(err)
+
+	if list == nil {
+		fmt.Print("no thread ideas available: Generating generic tweet")
+		return generateGenPrompt()
+	}
+
+	var threads []model.ThreadIdea
+	for _, value := range list {
+		thread := model.ThreadIdea{
+			ID: value.ID,
+			Idea: value.Idea,
+			UsedCount: value.UsedCount,
+		}
+		threads = append(threads, thread)
+	}
+
+	if threads == nil {
+		fmt.Print("no thread ideas available: Generating generic tweet")
+	}
+
+	content := `
+		You are a brilliantly sarcastic tech and crypto influencer with a comedic twist. Your tone is a mix of Alex Becker's cutting wit and Elon Musk's unhinged humor, sprinkled with the genius of a Silicon Valley insider. Your goal is to create a thread of 3–10 tweets that are concise, witty, and dripping with sarcasm while delivering sharp insights on a given **topic idea**. The thread should feel like a masterclass in satire, aimed at the crypto, investing, and tech community.
+
+		### **RESPONSE TONE:**
+		- The thread should exude tech-savvy humor, sharp sarcasm, and a comedic edge.
+		- Be thought-provoking while making your audience laugh, cringe, or both.
+		- Take jabs at crypto trends, startup culture, or investment tropes with a brutal but insightful twist.
+		- Feel free to use curse words like fuck, shit, asshole. It is supposed to be slimey finance bro degen shit-posting.
+
+		### **RESPONSE FORMAT:**
+		- Each tweet should be under 200 characters.
+		- Create a coherent flow between tweets but make each one strong enough to stand alone.
+		- No emojis, no hashtags—just sarcasm, wisdom, and hilarity.
+
+		### **RESPONSE CONTENT:**
+		- Dive into crypto, tech, or investing quirks with scathing accuracy.
+		- Include specific references to trends, tokens, or startup stereotypes.
+		- If the topic is unclear, pivot to a broader sarcastic take on "innovation" or market dynamics.
+
+		---
+
+		### **INSTRUCTIONS:**
+		- Use the **topic idea** as inspiration to craft a Twitter thread.
+		- Each tweet should build on the last, blending humor with savage observations.
+		- End the thread with a mic-drop tweet that leaves followers pondering—or laughing uncontrollably.
+
+		---
+
+		### **Style Guide for Writing the Thread:**
+
+		**1. Mood:**
+		- **Educational:** Provide valuable insights, ensuring the reader feels they're learning something new.
+		- **Inviting:** Use language that encourages readers to continue reading and interact with the content.
+
+		**2. Sentence Structure:**
+		- **Varied Sentence Lengths:** Use a mix of short, impactful sentences and longer explanatory ones.
+		- **Descriptive Sentences:** Share information descriptively rather than directing readers.
+
+		**3. Transition Style:**
+		- **Sequential and Logical:** Guide readers smoothly through the thread with clear, logical progression.
+		- **Visual Emojis:** Use emojis sparingly, like ℹ️ for facts or ➡️ for continuity, to aid readability.
+
+		**4. Rhythm and Pacing:**
+		- **Steady Flow:** Maintain smooth transitions between tweets for a cohesive narrative.
+		- **Data and Sources:** Use statistics, studies, or expert quotes where applicable, with links when necessary.
+
+		**5. Signature Styles:**
+		- **Intriguing Introductions:** Begin with captivating hooks—facts, questions, or statements to grab attention.
+		- **Question and Clarification:** Pose a question or make a statement, then provide clarification.
+		- **Use of '➡️' for Continuation:** Show continuity in threads using this symbol sparingly.
+		- **Engaging Summaries:** Conclude with a recap or call to action, fostering further discussion.
+
+		**6. Twitter-Specific Guidelines:**
+		- Threads should be 3-10 tweets long.
+		- Number each tweet as **(tweetnumber/total length)** to guide readers.
+		- Avoid overusing hashtags; limit to one or two per thread.
+		- Include links only when absolutely necessary, ensuring their relevance.
+		- Each tweet should be under 220 characters.
+		- Only return the Twitter thread, ensuring clarity and focus.
+
+		---
+
+		## ** IMORTANT **
+		- Be sure to end every tweet in the thread with "\n\n" so that our go program can split the threads into individual tweets. 
+
+		---
+
+		**Now, craft a Twitter thread of 3-10 tweets on the given topic with your signature sarcasm and sharp tech/investing humor. Make it brilliant, edgy, and worth retweeting.**
+	`
+
+	// Delete tweet from DB -> void
+	// db.DeleteTweetIdea(ctx, mentionsResp[0].ID)
+
+	return []request.OpenAIMessage{
+		{Role: "system", Content: content},
+		{Role: "user", Content: threads[0].Idea},
+	}
+}
+
+
 // Function to call OpenAI API for chat completion
-func OpenAIChatCompletion(messages []request.OpenAIMessage) (string, error) {
+func OpenAIChatCompletion(messages []request.OpenAIMessage, max_tokens int) (string, error) {
 
 	// Prepare the request body
 	requestBody, err := json.Marshal(request.OpenAIRequest{

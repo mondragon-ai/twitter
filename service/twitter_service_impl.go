@@ -33,9 +33,9 @@ func (t *TwitterServiceImpl) MakeTwitterRequest(ctx context.Context, method, url
     consumerSecret := os.Getenv("CONSUMER_SECRET")
     accessTokenKey := os.Getenv("ACCESS_TOKEN_KEY")
     accessTokenSecret := os.Getenv("ACCESS_TOKEN_SECRET")
-	bearer := os.Getenv("ANGEL_BEARER")
+	// bearer := os.Getenv("ANGEL_BEARER")
 
-	token := fmt.Sprintf("Bearer %s", bearer)
+	// token := fmt.Sprintf("Bearer %s", bearer)
     if consumerKey == "" || consumerSecret == "" || accessTokenKey == "" || accessTokenSecret == "" {
         log.Fatal("One or more required environment variables are missing")
     }
@@ -62,14 +62,8 @@ func (t *TwitterServiceImpl) MakeTwitterRequest(ctx context.Context, method, url
 		log.Printf("Request body: %v", requestBody)
 	}
 
-	log.Printf("Request URL: %s", url)
-	log.Printf("Authorization Header: %s", token)
-	log.Printf("HTTP Method: %s", method)
-
-
     // Create HTTP request
     req, err := http.NewRequest(method, url, requestBody)
-    log.Printf("Request: %v", req)
     if err != nil {
 		log.Printf("Failed to create HTTP request: %v", err)
 		return nil, fmt.Errorf("failed to create HTTP request: %w", err)
@@ -81,10 +75,7 @@ func (t *TwitterServiceImpl) MakeTwitterRequest(ctx context.Context, method, url
     if requestBody != nil {
         req.Header.Set("Content-Type", "application/json")
     }
-    req.Header.Set("Authorization", token)
-
-    log.Printf("Making %s request to URL: %s", method, url)
-    log.Printf("Request Headers: %v", req.Header)
+    req.Header.Set("Authorization", signature)
 
     client := &http.Client{}
     resp, err := func() (*http.Response, error) {
@@ -140,6 +131,50 @@ func (t *TwitterServiceImpl) GetTwitterRequest(ctx context.Context, url string, 
     }
 
     return data, nil
+}
+
+func (t *TwitterServiceImpl) MakeThreadTweet(ctx context.Context, text *string, id *string) (*http.Response, *string, error) {
+	body := map[string]interface{}{
+		"text": *text, // Dereference the pointer to get the string value
+	}
+
+	if id != nil {
+		body["reply"] = map[string]string{
+			"in_reply_to_tweet_id": *id, // Dereference the pointer
+		}
+	}
+
+	// Make the Twitter request
+	url := "https://api.twitter.com/2/tweets"
+	resp, err := t.MakeTwitterRequest(ctx, http.MethodPost, url, body)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to post tweet: %w", err)
+	}
+
+	// Check for a non-2xx status code
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		respBody, _ := io.ReadAll(resp.Body)
+		return nil, nil, fmt.Errorf("twitter API error: %s", string(respBody))
+	}
+
+	// Parse the response body
+	var response map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return nil, nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	// Extract the tweet ID
+	data, ok := response["data"].(map[string]interface{})
+	if !ok {
+		return nil, nil, fmt.Errorf("unexpected response format: %v", response)
+	}
+
+	tweetID, ok := data["id"].(string)
+	if !ok {
+		return nil, nil, fmt.Errorf("tweet ID not found in response: %v", data)
+	}
+
+	return resp, &tweetID, nil
 }
 
 func (t *TwitterServiceImpl) FetchMentions(ctx context.Context) ([]model.Mention, error)  {
@@ -208,11 +243,13 @@ func (t *TwitterServiceImpl) PostTweet(ctx context.Context, request request.Twee
 	
 
 	text := ""
+	var resp *http.Response
+	var err error
 	switch request.Type {
 	case "create":
 
-		messages := generateCreativePrompt()
-		completion, err := OpenAIChatCompletion(messages)
+		messages := generateCreativePrompt(t.MentionRepository, ctx)
+		completion, err := OpenAIChatCompletion(messages, 300)
 		if err != nil {
 			return nil, fmt.Errorf("could not compelte chat: %w", err)
 		}
@@ -221,7 +258,7 @@ func (t *TwitterServiceImpl) PostTweet(ctx context.Context, request request.Twee
 		text = strings.Replace(filteredHash, "\"", "", -1)
 	case "clone":
 		messages := generateClonePrompt(t.MentionRepository, ctx)
-		completion, err := OpenAIChatCompletion(messages)
+		completion, err := OpenAIChatCompletion(messages, 300)
 		if err != nil {
 			return nil, fmt.Errorf("could not compelte chat: %w", err)
 		}
@@ -230,34 +267,48 @@ func (t *TwitterServiceImpl) PostTweet(ctx context.Context, request request.Twee
 		text = strings.Replace(filteredHash, "\"", "", -1)
 	case "article":
 		messages := generateArticlePrompt(t.MentionRepository, ctx)
-		completion, err := OpenAIChatCompletion(messages)
+		completion, err := OpenAIChatCompletion(messages, 300)
 		if err != nil {
 			return nil, fmt.Errorf("could not compelte chat: %w", err)
 		}
 
 		filteredHash := filterWordsWithHash(completion);
 		text = strings.Replace(filteredHash, "\"", "", -1)
+
+	case "thread":
+		messages := generateThreadPrompt(t.MentionRepository, ctx)
+		completion, err := OpenAIChatCompletion(messages, 1000)
+		if err != nil {
+			return nil, fmt.Errorf("could not compelte chat: %w", err)
+		}
+
+		filteredHash := filterWordsWithHash(completion);
+		resp := cleanThread(filteredHash, t, ctx)
+		// Ensure the response is not nil
+		if resp == nil {
+			return nil, fmt.Errorf("failed to post thread: response is nil")
+		}
+
+		return resp, nil
 	default:
 		return nil, fmt.Errorf("default to post tweet: %v", "TEST")
 	}
+
 	// t.MentionRepository.
 
+	// Prepare the body for the POST request
+	body := map[string]string{
+		"text": text,
+	}
 
-	log.Print(request)
-    log.Printf("text: %s", text)
-	// // Prepare the body for the POST request
-	// body := map[string]string{
-	// 	"text": text,
-	// }
+	// Make the Twitter request
+	url := "https://api.twitter.com/2/tweets"
+	resp, err = t.MakeTwitterRequest(ctx, http.MethodPost, url, body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to post tweet: %w", err)
+	}
 
-	// // Make the Twitter request
-	// url := "https://api.twitter.com/2/tweets"
-	// resp, err := t.MakeTwitterRequest(ctx, http.MethodPost, url, body)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to post tweet: %w", err)
-	// }
-
-	return nil, fmt.Errorf("failed to post tweet: %v", "TEST")
+	return resp, nil
 }
 
 func (t *TwitterServiceImpl) ReplyMention(ctx context.Context, mentionId string) {
