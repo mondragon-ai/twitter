@@ -287,9 +287,7 @@
       // Fetch the data from the API
       async function fetchIdeas() {
         try {
-          const response = await fetch(
-            "twitter-bot-angel-416be0075ba0.herokuapp.com/api/ideas",
-          );
+          const response = await fetch("api/ideas");
           const jsonData = await response.json();
 
           // Check if the response status is ok
@@ -311,9 +309,7 @@
               const button = document.createElement("button");
               button.textContent = "🗑️";
               button.addEventListener("click", async () => {
-                await deleteData(
-                  `twitter-bot-angel-416be0075ba0.herokuapp.com/api/ideas/${item.id}`,
-                );
+                await deleteData(`api/ideas/${item.id}`);
                 li.remove();
               });
 
@@ -335,9 +331,7 @@
 
       async function fetchThreads() {
         try {
-          const response = await fetch(
-            "twitter-bot-angel-416be0075ba0.herokuapp.com/api/threads",
-          );
+          const response = await fetch("api/threads");
           const jsonData = await response.json();
 
           // Check if the response status is ok
@@ -359,9 +353,7 @@
               const button = document.createElement("button");
               button.textContent = "🗑️";
               button.addEventListener("click", async () => {
-                await deleteData(
-                  `twitter-bot-angel-416be0075ba0.herokuapp.com/api/threads/${item.id}`,
-                );
+                await deleteData(`api/threads/${item.id}`);
                 li.remove();
               });
 
@@ -383,9 +375,7 @@
 
       async function fetchClones() {
         try {
-          const response = await fetch(
-            "twitter-bot-angel-416be0075ba0.herokuapp.com/api/clones",
-          );
+          const response = await fetch("api/clones");
           const jsonData = await response.json();
 
           // Check if the response status is ok
@@ -407,9 +397,7 @@
               const button = document.createElement("button");
               button.textContent = "🗑️";
               button.addEventListener("click", async () => {
-                await deleteData(
-                  `twitter-bot-angel-416be0075ba0.herokuapp.com/api/clone/${item.id}`,
-                );
+                await deleteData(`api/clone/${item.id}`);
                 li.remove();
               });
 
@@ -431,9 +419,7 @@
 
       async function fetchArticles() {
         try {
-          const response = await fetch(
-            "twitter-bot-angel-416be0075ba0.herokuapp.com/api/articles",
-          );
+          const response = await fetch("api/articles");
           const jsonData = await response.json();
 
           // Check if the response status is ok
@@ -455,9 +441,7 @@
               const button = document.createElement("button");
               button.textContent = "🗑️";
               button.addEventListener("click", async () => {
-                await deleteData(
-                  `twitter-bot-angel-416be0075ba0.herokuapp.com/api/articles/${item.id}`,
-                );
+                await deleteData(`api/articles/${item.id}`);
                 li.remove();
               });
 
@@ -493,13 +477,10 @@
         saveIdea.addEventListener("click", async function () {
           const idea = ideaInput.value.trim();
           if (idea) {
-            await saveData(
-              "twitter-bot-angel-416be0075ba0.herokuapp.com/api/ideas",
-              {
-                idea: idea,
-                used_count: 1,
-              },
-            );
+            await saveData("api/ideas", {
+              idea: idea,
+              used_count: 1,
+            });
             await fetchIdeas();
             ideaInput.value = "";
           } else {
@@ -511,13 +492,10 @@
         saveThread.addEventListener("click", async function () {
           const thread = threadInput.value.trim();
           if (thread) {
-            await saveData(
-              "twitter-bot-angel-416be0075ba0.herokuapp.com/api/threads",
-              {
-                idea: thread,
-                used_count: 1,
-              },
-            );
+            await saveData("api/threads", {
+              idea: thread,
+              used_count: 1,
+            });
             await fetchThreads();
             threadInput.value = "";
           } else {
@@ -529,13 +507,10 @@
         saveClone.addEventListener("click", async function () {
           const clone = cloneInput.value.trim();
           if (clone) {
-            await saveData(
-              "twitter-bot-angel-416be0075ba0.herokuapp.com/api/clone",
-              {
-                tweet: clone,
-                author_name: "",
-              },
-            );
+            await saveData("api/clone", {
+              tweet: clone,
+              author_name: "",
+            });
             await fetchClones();
             cloneInput.value = "";
           } else {
@@ -547,13 +522,10 @@
         saveArticle.addEventListener("click", async function () {
           const article = articleInput.value.trim();
           if (article) {
-            await saveData(
-              "twitter-bot-angel-416be0075ba0.herokuapp.com/api/articles",
-              {
-                url: article,
-                title: "",
-              },
-            );
+            await saveData("api/articles", {
+              url: article,
+              title: "",
+            });
             await fetchArticles();
             articleInput.value = "";
           } else {
