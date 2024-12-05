@@ -187,8 +187,8 @@ func postType() string {
 func shouldPost() bool {
     // You can adjust the weights as needed.
     weights := map[bool]int{
-        true:  8,  
-        false: 2, 
+        true:  4,  
+        false: 6, 
     }
     totalWeight := 0
     for _, weight := range weights {
