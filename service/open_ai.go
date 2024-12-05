@@ -205,12 +205,12 @@ func generateCreativePrompt(db mentions.MentionRepository, ctx context.Context) 
 		Now, generate a tweet for the **topic idea** provided, using your sarcastic wit and deep knowledge of the crypto and investing world. Remember, no emojis, no hashtags, just pure brilliance.
 	`
 
-	// Delete tweet from DB -> void
-	// db.DeleteTweetIdea(ctx, mentionsResp[0].ID)
 
 
 	randomIndex := rand.Intn(len(mentionsResp))
-	// randomTopic := getRandomTopic()
+
+	// Delete tweet from DB -> void
+	db.DeleteTweetIdea(ctx, mentionsResp[randomIndex].ID)
 	return []request.OpenAIMessage{
 		{Role: "system", Content: content},
 		{Role: "user", Content: mentionsResp[randomIndex].Idea},
@@ -275,12 +275,10 @@ func generateClonePrompt(db mentions.MentionRepository, ctx context.Context) []r
 		Now, take the tweet provided and craft a witty, sarcastic variation that maintains the humor and insight. Keep it sharp, short, and savage.
 	`
 
-	// TODO: Delete tweet from DB -> void
-
-
-	// Pass content to openai -> string
-
 	randomIndex := rand.Intn(len(mentionsResp))
+
+	// Delete tweet from DB -> void
+	db.DeleteTweetClone(ctx, mentionsResp[randomIndex].ID)
 	return []request.OpenAIMessage{
 		{Role: "system", Content: content},
 		{Role: "user", Content: mentionsResp[randomIndex].Tweet},
@@ -411,7 +409,8 @@ func generateArticlePrompt(db mentions.MentionRepository, ctx context.Context,) 
 	`
 
 	// Delete tweet from DB -> void
-	// db.DeleteTweetIdea(ctx, mentionsResp[0].ID)
+	db.DeleteArticleUrl(ctx, articles[randomIndex].ID)
+
 
 	return []request.OpenAIMessage{
 		{Role: "system", Content: content},
@@ -571,10 +570,11 @@ func generateThreadPrompt(db mentions.MentionRepository, ctx context.Context,) [
 		**Now, craft a Twitter thread of 3-10 tweets on the given topic with your signature sarcasm and sharp tech/investing humor. Make it brilliant, edgy, and worth retweeting.**
 	`
 
-	// Delete tweet from DB -> void
-	// db.DeleteTweetIdea(ctx, mentionsResp[0].ID)
 
 	randomIndex := rand.Intn(len(threads))
+
+	// Delete tweet from DB -> void
+	db.DeleteArticleUrl(ctx, threads[randomIndex].ID)
 	return []request.OpenAIMessage{
 		{Role: "system", Content: content},
 		{Role: "user", Content: threads[randomIndex].Idea},
